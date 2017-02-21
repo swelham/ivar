@@ -64,6 +64,13 @@ defmodule IvarTest do
     assert request.auth == {:bearer, "token"}
   end
 
+  test "put_auth/3 should put the basic auth credentials" do
+    request = Ivar.new(:get, "")
+      |> Ivar.put_auth(:basic, {"username", "password"})
+
+    assert request.auth == {:basic, {"username", "password"}}
+  end
+
   test "send/1 should send minimal empty request", %{bypass: bypass} do
     methods = [:get, :post, :patch, :put, :delete]
 
@@ -140,6 +147,25 @@ defmodule IvarTest do
       {:ok, result} =
         Ivar.new(method, test_url(bypass))
         |> Ivar.put_auth(:bearer, "some.token")
+        |> Ivar.send
+      
+      assert result.status_code == 200
+    end
+  end
+
+  test "send/1 should send request with basic auth header", %{bypass: bypass} do
+    methods = [:get, :post, :patch, :put, :delete]
+
+    for method <- methods do
+      Bypass.expect bypass, fn conn ->
+        assert has_header(conn, {"authorization", "Basic dXNlcm5hbWU6cGFzc3dvcmQ="})
+
+        Plug.Conn.send_resp(conn, 200, "")
+      end
+
+      {:ok, result} =
+        Ivar.new(method, test_url(bypass))
+        |> Ivar.put_auth(:basic, {"username", "password"})
         |> Ivar.send
       
       assert result.status_code == 200

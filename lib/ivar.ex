@@ -32,17 +32,24 @@ defmodule Ivar do
   def put_auth(request, :bearer, token),
     do: Map.put(request, :auth, {:bearer, token})
 
+  def put_auth(request, :basic, credentials),
+    do: Map.put(request, :auth, {:basic, credentials})
+
   @doc """
   """
   def send(request) do
-    request = set_auth(request)
+    request = request
+      |> prepare_auth
+
+    opts = []
+      |> put_basic_auth(request)
 
     HTTPoison.request(
       request.method,
       request.url,
       Map.get(request, :body, ""),
       Map.get(request, :headers, []),
-      [])
+      opts)
   end
 
   defp put_headers(headers, request),
@@ -52,8 +59,13 @@ defmodule Ivar do
   defp get_mime_type(:xml),         do: "application/xml"
   defp get_mime_type(:url_encoded), do: "application/x-www-form-urlencoded"
 
-  defp set_auth(%{auth: {:bearer, token}} = request),
+  defp prepare_auth(%{auth: {:bearer, token}} = request),
     do: put_header(request, "authorization", "bearer #{token}")
 
-  defp set_auth(request), do: request
+  defp prepare_auth(request), do: request
+
+  defp put_basic_auth(opts, %{auth: {:basic, credentials}}),
+    do: [hackney: [basic_auth: credentials]] ++ opts
+    
+  defp put_basic_auth(opts, _), do: opts
 end
