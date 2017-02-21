@@ -16,6 +16,14 @@ defmodule IvarTest do
     assert Ivar.new(:delete, "http://example.com") == %{method: :delete, url: "http://example.com"}
   end
 
+  test "put_body/3 should add the body and content type to the request map" do
+    map = Ivar.new(:get, "")
+      |> Ivar.put_body("some plain text", "text/plain")
+    
+    assert map.body == "some plain text"
+    assert Map.get(map.headers, "content-type") == "text/plain"
+  end
+
   test "send/1 should successfully send a get request", %{bypass: bypass} do
     Bypass.expect bypass, fn conn ->
       assert conn.method == "GET"
