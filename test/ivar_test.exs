@@ -2,12 +2,10 @@ defmodule IvarTest do
   use ExUnit.Case
   doctest Ivar
 
-  test "new/1 should return a map with the correct http method set" do
-    assert Ivar.new(:get)    == %{method: :get}
-    assert Ivar.new(:post)   == %{method: :post}
-    assert Ivar.new(:put)    == %{method: :put}
-    assert Ivar.new(:patch)  == %{method: :patch}
-    assert Ivar.new(:delete) == %{method: :delete}
+  setup do
+    bypass = Bypass.open
+
+    {:ok, bypass: bypass}
   end
 
   test "new/2 should return a map with the correct http method and url set" do
@@ -17,4 +15,86 @@ defmodule IvarTest do
     assert Ivar.new(:patch,  "http://example.com") == %{method: :patch, url: "http://example.com"}
     assert Ivar.new(:delete, "http://example.com") == %{method: :delete, url: "http://example.com"}
   end
+
+  test "send/1 should successfully send a get request", %{bypass: bypass} do
+    Bypass.expect bypass, fn conn ->
+      assert conn.method == "GET"
+      assert conn.host == "localhost"
+      assert conn.port == bypass.port
+
+      Plug.Conn.send_resp(conn, 200, "")
+    end
+
+    {:ok, result} =
+      Ivar.new(:get, test_url(bypass))
+      |> Ivar.send
+    
+    assert result.status_code == 200
+  end
+
+  test "send/1 should successfully send a post request", %{bypass: bypass} do
+    Bypass.expect bypass, fn conn ->
+      assert conn.method == "POST"
+      assert conn.host == "localhost"
+      assert conn.port == bypass.port
+
+      Plug.Conn.send_resp(conn, 200, "")
+    end
+
+    {:ok, result} =
+      Ivar.new(:post, test_url(bypass))
+      |> Ivar.send
+    
+    assert result.status_code == 200
+  end
+
+  test "send/1 should successfully send a put request", %{bypass: bypass} do
+    Bypass.expect bypass, fn conn ->
+      assert conn.method == "PUT"
+      assert conn.host == "localhost"
+      assert conn.port == bypass.port
+
+      Plug.Conn.send_resp(conn, 200, "")
+    end
+
+    {:ok, result} =
+      Ivar.new(:put, test_url(bypass))
+      |> Ivar.send
+    
+    assert result.status_code == 200
+  end
+
+  test "send/1 should successfully send a patch request", %{bypass: bypass} do
+    Bypass.expect bypass, fn conn ->
+      assert conn.method == "PATCH"
+      assert conn.host == "localhost"
+      assert conn.port == bypass.port
+
+      Plug.Conn.send_resp(conn, 200, "")
+    end
+
+    {:ok, result} =
+      Ivar.new(:patch, test_url(bypass))
+      |> Ivar.send
+    
+    assert result.status_code == 200
+  end
+
+  test "send/1 should successfully send a delete request", %{bypass: bypass} do
+    Bypass.expect bypass, fn conn ->
+      assert conn.method == "DELETE"
+      assert conn.host == "localhost"
+      assert conn.port == bypass.port
+
+      Plug.Conn.send_resp(conn, 200, "")
+    end
+
+    {:ok, result} =
+      Ivar.new(:delete, test_url(bypass))
+      |> Ivar.send
+    
+    assert result.status_code == 200
+  end
+
+  defp test_url(bypass), do: "http://localhost:#{bypass.port}"
 end
