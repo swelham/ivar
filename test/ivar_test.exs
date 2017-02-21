@@ -19,7 +19,7 @@ defmodule IvarTest do
   end
 
   test "put_body/3 should add the body and content type to the request map" do
-    request = Ivar.new(:get, "")
+    request = Ivar.new(:post, "")
       |> Ivar.put_body("some plain text", "text/plain")
     
     assert request.body == "some plain text"
@@ -27,7 +27,7 @@ defmodule IvarTest do
   end
 
   test "put_body/3 should put the known data type: json" do
-    request = Ivar.new(:get, "")
+    request = Ivar.new(:post, "")
       |> Ivar.put_body("{\"test\": 123}", :json)
     
     assert request.body == "{\"test\": 123}"
@@ -35,7 +35,7 @@ defmodule IvarTest do
   end
 
   test "put_body/3 should put the known data type: form url encoded" do
-    request = Ivar.new(:get, "")
+    request = Ivar.new(:post, "")
       |> Ivar.put_body("test=123", :url_encoded)
     
     assert request.body == "test=123"
@@ -43,11 +43,22 @@ defmodule IvarTest do
   end
 
   test "put_body/3 should put the known data type: xml" do
-    request = Ivar.new(:get, "")
+    request = Ivar.new(:post, "")
       |> Ivar.put_body("<test>123</test>", :xml)
     
     assert request.body == "<test>123</test>"
     assert Map.get(request.headers, "content-type") == "application/xml"
+  end
+
+  test "put_body/3 should return error for get and delete requests" do
+    methods = [:get, :delete]
+
+    for method <- methods do
+      request = Ivar.new(method, "")
+        |> Ivar.put_body("abc=123", :url_encoded)
+      
+      assert request == {:error, "Body not allowed for #{Atom.to_string(method)} request"}
+    end
   end
 
   test "put_header/3 should put the header in the map headers list" do

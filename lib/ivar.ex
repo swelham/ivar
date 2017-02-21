@@ -9,6 +9,9 @@ defmodule Ivar do
 
   @doc """
   """
+  def put_body(%{method: method}, _, _) when method in [:get, :delete],
+    do: {:error, "Body not allowed for #{Atom.to_string(method)} request"}
+
   def put_body(request, body, mime_type) when is_atom(mime_type),
     do: put_body(request, body, get_mime_type(mime_type))
 
