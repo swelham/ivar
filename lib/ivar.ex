@@ -20,6 +20,15 @@ defmodule Ivar do
 
   @doc """
   """
+  def put_header(request, key, value) do
+    request
+      |> Map.get(:headers, %{})
+      |> Map.put(key, value)
+      |> put_headers(request)
+  end
+
+  @doc """
+  """
   def send(request) do
     HTTPoison.request(
       request.method,
@@ -27,13 +36,6 @@ defmodule Ivar do
       Map.get(request, :body, ""),
       Map.get(request, :headers, []),
       [])
-  end
-
-  defp put_header(request, key, value) do
-    request
-      |> Map.get(:headers) || %{}
-      |> Map.put(key, value)
-      |> put_headers(request)
   end
 
   defp put_headers(headers, request),

@@ -50,6 +50,13 @@ defmodule IvarTest do
     assert Map.get(map.headers, "content-type") == "application/xml"
   end
 
+  test "put_header/3 should put the header in the map headers list" do
+    map = Ivar.new(:get, "")
+      |> Ivar.put_header("x-test", "some_test")
+    
+    assert Map.get(map.headers, "x-test") == "some_test"
+  end
+
   test "send/1 should send minimal empty request", %{bypass: bypass} do
     methods = [:get, :post, :patch, :put, :delete]
 
@@ -77,9 +84,6 @@ defmodule IvarTest do
       Bypass.expect bypass, fn conn ->
         {:ok, body, _} = Plug.Conn.read_body(conn)
 
-        assert conn.method == method_type(method)
-        assert conn.host == "localhost"
-        assert conn.port == bypass.port
         assert has_header(conn, {"content-type", "application/x-www-form-urlencoded"})
         assert body == "test=123"
 
@@ -89,6 +93,27 @@ defmodule IvarTest do
       {:ok, result} =
         Ivar.new(method, test_url(bypass))
         |> Ivar.put_body("test=123", :url_encoded)
+        |> Ivar.send
+      
+      assert result.status_code == 200
+    end
+  end
+
+  test "send/1 should send request with headers", %{bypass: bypass} do
+    methods = [:get, :post, :patch, :put, :delete]
+
+    for method <- methods do
+      Bypass.expect bypass, fn conn ->
+        assert has_header(conn, {"x-test", "123"})
+        assert has_header(conn, {"x-abc", "xyz"})
+
+        Plug.Conn.send_resp(conn, 200, "")
+      end
+
+      {:ok, result} =
+        Ivar.new(method, test_url(bypass))
+        |> Ivar.put_header("x-test", "123")
+        |> Ivar.put_header("x-abc", "xyz")
         |> Ivar.send
       
       assert result.status_code == 200
