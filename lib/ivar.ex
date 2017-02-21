@@ -24,8 +24,8 @@ defmodule Ivar do
     HTTPoison.request(
       request.method,
       request.url,
-      "",
-      [],
+      Map.get(request, :body, ""),
+      Map.get(request, :headers, []),
       [])
   end
 
