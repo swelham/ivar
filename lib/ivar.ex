@@ -29,7 +29,14 @@ defmodule Ivar do
 
   @doc """
   """
+  def put_auth(request, :bearer, token),
+    do: Map.put(request, :auth, {:bearer, token})
+
+  @doc """
+  """
   def send(request) do
+    request = set_auth(request)
+
     HTTPoison.request(
       request.method,
       request.url,
@@ -44,4 +51,9 @@ defmodule Ivar do
   defp get_mime_type(:json),        do: "application/json"
   defp get_mime_type(:xml),         do: "application/xml"
   defp get_mime_type(:url_encoded), do: "application/x-www-form-urlencoded"
+
+  defp set_auth(%{auth: {:bearer, token}} = request),
+    do: put_header(request, "authorization", "bearer #{token}")
+
+  defp set_auth(request), do: request
 end

@@ -19,42 +19,49 @@ defmodule IvarTest do
   end
 
   test "put_body/3 should add the body and content type to the request map" do
-    map = Ivar.new(:get, "")
+    request = Ivar.new(:get, "")
       |> Ivar.put_body("some plain text", "text/plain")
     
-    assert map.body == "some plain text"
-    assert Map.get(map.headers, "content-type") == "text/plain"
+    assert request.body == "some plain text"
+    assert Map.get(request.headers, "content-type") == "text/plain"
   end
 
   test "put_body/3 should put the known data type: json" do
-    map = Ivar.new(:get, "")
+    request = Ivar.new(:get, "")
       |> Ivar.put_body("{\"test\": 123}", :json)
     
-    assert map.body == "{\"test\": 123}"
-    assert Map.get(map.headers, "content-type") == "application/json"
+    assert request.body == "{\"test\": 123}"
+    assert Map.get(request.headers, "content-type") == "application/json"
   end
 
   test "put_body/3 should put the known data type: form url encoded" do
-    map = Ivar.new(:get, "")
+    request = Ivar.new(:get, "")
       |> Ivar.put_body("test=123", :url_encoded)
     
-    assert map.body == "test=123"
-    assert Map.get(map.headers, "content-type") == "application/x-www-form-urlencoded"
+    assert request.body == "test=123"
+    assert Map.get(request.headers, "content-type") == "application/x-www-form-urlencoded"
   end
 
   test "put_body/3 should put the known data type: xml" do
-    map = Ivar.new(:get, "")
+    request = Ivar.new(:get, "")
       |> Ivar.put_body("<test>123</test>", :xml)
     
-    assert map.body == "<test>123</test>"
-    assert Map.get(map.headers, "content-type") == "application/xml"
+    assert request.body == "<test>123</test>"
+    assert Map.get(request.headers, "content-type") == "application/xml"
   end
 
   test "put_header/3 should put the header in the map headers list" do
-    map = Ivar.new(:get, "")
+    request = Ivar.new(:get, "")
       |> Ivar.put_header("x-test", "some_test")
     
-    assert Map.get(map.headers, "x-test") == "some_test"
+    assert Map.get(request.headers, "x-test") == "some_test"
+  end
+
+  test "put_auth/3 should put the bearer auth header" do
+    request = Ivar.new(:get, "")
+      |> Ivar.put_auth(:bearer, "token")
+
+    assert request.auth == {:bearer, "token"}
   end
 
   test "send/1 should send minimal empty request", %{bypass: bypass} do
@@ -114,6 +121,25 @@ defmodule IvarTest do
         Ivar.new(method, test_url(bypass))
         |> Ivar.put_header("x-test", "123")
         |> Ivar.put_header("x-abc", "xyz")
+        |> Ivar.send
+      
+      assert result.status_code == 200
+    end
+  end
+
+  test "send/1 should send request with bearer auth header", %{bypass: bypass} do
+    methods = [:get, :post, :patch, :put, :delete]
+
+    for method <- methods do
+      Bypass.expect bypass, fn conn ->
+        assert has_header(conn, {"authorization", "bearer some.token"})
+
+        Plug.Conn.send_resp(conn, 200, "")
+      end
+
+      {:ok, result} =
+        Ivar.new(method, test_url(bypass))
+        |> Ivar.put_auth(:bearer, "some.token")
         |> Ivar.send
       
       assert result.status_code == 200
