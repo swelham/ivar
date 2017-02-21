@@ -9,8 +9,10 @@ defmodule Ivar do
 
   @doc """
   """
+  def put_body(request, body, mime_type) when is_atom(mime_type),
+    do: put_body(request, body, get_mime_type(mime_type))
+
   def put_body(request, body, mime_type) do
-    IO.puts "blah"
     request
       |> Map.put(:body, body)
       |> put_header("content-type", mime_type)
@@ -36,4 +38,8 @@ defmodule Ivar do
 
   defp put_headers(headers, request),
     do: Map.put(request, :headers, headers)
+
+  defp get_mime_type(:json),        do: "application/json"
+  defp get_mime_type(:xml),         do: "application/xml"
+  defp get_mime_type(:url_encoded), do: "application/x-www-form-urlencoded"
 end
