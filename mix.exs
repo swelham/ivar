@@ -5,6 +5,8 @@ defmodule Ivar.Mixfile do
     [app: :ivar,
      version: "0.1.0",
      elixir: "~> 1.4",
+     description: description(),
+     package: package(),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      deps: deps()]
@@ -30,7 +32,19 @@ defmodule Ivar.Mixfile do
   defp deps do
     [
       {:httpoison, "~> 0.11.0"},
+      {:ex_doc, "~> 0.15.0", only: :dev},
       {:bypass, "~> 0.6.0", only: :test}
     ]
+  end
+
+  defp description do
+    "Ivar is a light weight wrapper around HTTPoison that provides a fluent and composable way to build http requests."
+  end
+
+  defp package do
+    [name: :ivar,
+     maintainers: ["swelham"],
+     licenses: ["MIT"],
+     links: %{"GitHub" => "https://github.com/swelham/ivar"}]
   end
 end
