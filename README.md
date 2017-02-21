@@ -19,7 +19,7 @@ defmodule IvarExample do
   def send_some_request do
     Ivar.new(:post, "http://example.com")
       |> Ivar.put_auth(:bearer, "some_token")
-      |> Ivar.put_body(:json, "{\"testing\": 123}")
+      |> Ivar.put_body("{\"testing\": 123}", :json)
       |> Ivar.send
   end
 end
