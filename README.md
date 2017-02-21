@@ -1,11 +1,10 @@
 # Ivar
 
-**TODO: Add description**
+Ivar is a light weight wrapper around HTTPoison that provides a fluent and composable way to build http requests
 
-## Installation
+## Usage
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `ivar` to your list of dependencies in `mix.exs`:
+Add `ivar` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
@@ -13,7 +12,16 @@ def deps do
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/ivar](https://hexdocs.pm/ivar).
+You can then start to build http requests in a fluent nature
+
+```elixir
+defmodule IvarExample do
+  def send_some_request do
+    Ivar.new(:post, "http://example.com")
+      |> Ivar.put_auth(:bearer, "some_token")
+      |> Ivar.put_body(:json, "{\"testing\": 123}")
+      |> Ivar.send
+  end
+end
+```
 
