@@ -2,6 +2,12 @@ defmodule Ivar do
   @moduledoc """
   Documentation for Ivar.
   """
+  
+  @mime_types %{
+    json: "application/json",
+    xml: "application/xml",
+    url_encoded: "application/x-www-form-urlencoded"
+  }
 
   @doc """
   """
@@ -54,13 +60,31 @@ defmodule Ivar do
       Map.get(request, :headers, []),
       [])
   end
+  
+  @doc """
+  """
+  def unpack({:ok, %HTTPoison.Response{body: body} = response}) do
+    ctype = get_content_type(response.headers)
+    data = decode_body(body, ctype)
+    
+    {data, response}
+  end
 
   defp put_headers(headers, request),
     do: Map.put(request, :headers, headers)
 
-  defp get_mime_type(:json),        do: "application/json"
-  defp get_mime_type(:xml),         do: "application/xml"
-  defp get_mime_type(:url_encoded), do: "application/x-www-form-urlencoded"
+  defp get_mime_type(type) when is_atom(type),
+    do: Map.get(@mime_types, type)
+    
+  defp get_mime_type(type) when is_binary(type) do
+    [ctype | _] = String.split(type, ";")
+
+    @mime_types
+      |> Enum.find(fn {_, v} -> v == ctype end)
+      |> elem(0)
+  end
+      
+  defp get_mime_type(_), do: nil
 
   defp prepare_auth(%{auth: {:bearer, token}} = request),
     do: put_header(request, "authorization", "bearer #{token}")
@@ -74,4 +98,17 @@ defmodule Ivar do
   
   defp encode_body(body, :json),        do: Poison.encode!(body)
   defp encode_body(body, :url_encoded), do: URI.encode_query(body)
+  
+  defp decode_body(body, nil), do: body
+  defp decode_body(body, :json), do: Poison.decode!(body)
+  #defp decode_body(body, :url_encoded), do: URI.decode_query(body)
+  
+  defp get_content_type(headers) do
+    Enum.find(headers, &is_content_type_header/1)
+      |> elem(1)
+      |> get_mime_type
+  end
+  
+  defp is_content_type_header({k, _}),
+    do: String.downcase(k) == "content-type"
 end

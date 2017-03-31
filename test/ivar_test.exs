@@ -196,7 +196,7 @@ defmodule IvarTest do
     for method <- methods do
       Bypass.expect bypass, fn conn ->
         assert has_header(conn, {"authorization", "basic dXNlcm5hbWU6cGFzc3dvcmQ="})
-
+        
         Plug.Conn.send_resp(conn, 200, "")
       end
 
@@ -207,6 +207,21 @@ defmodule IvarTest do
       
       assert result.status_code == 200
     end
+  end
+
+  test "unpack/1 should decode a json response", %{bypass: bypass} do
+    Bypass.expect bypass, fn conn ->
+      conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.send_resp(200, "{\"test\":\"data\"}")
+    end
+    
+    {result, %HTTPoison.Response{}} =
+      Ivar.new(:get, test_url(bypass))
+      |> Ivar.send
+      |> Ivar.unpack
+      
+    assert result == %{"test" => "data"}
   end
 
   defp test_url(bypass), do: "http://localhost:#{bypass.port}"
