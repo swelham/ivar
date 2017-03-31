@@ -12,6 +12,11 @@ defmodule Ivar do
   def put_body(%{method: method}, _, _) when method in [:get, :delete],
     do: {:error, "Body not allowed for #{Atom.to_string(method)} request"}
 
+  def put_body(request, body, :url_encoded) when not is_binary(body) do
+    body = URI.encode_query(body)
+    put_body(request, body, :url_encoded)
+  end
+
   def put_body(request, body, mime_type) when is_atom(mime_type),
     do: put_body(request, body, get_mime_type(mime_type))
 
@@ -32,10 +37,10 @@ defmodule Ivar do
 
   @doc """
   """
-  def put_auth(request, :bearer, token),
+  def put_auth(request, token, :bearer),
     do: Map.put(request, :auth, {:bearer, token})
 
-  def put_auth(request, :basic, credentials),
+  def put_auth(request, credentials, :basic),
     do: Map.put(request, :auth, {:basic, credentials})
 
   @doc """
@@ -44,15 +49,12 @@ defmodule Ivar do
     request = request
       |> prepare_auth
 
-    opts = []
-      |> put_basic_auth(request)
-
     HTTPoison.request(
       request.method,
       request.url,
       Map.get(request, :body, ""),
       Map.get(request, :headers, []),
-      opts)
+      [])
   end
 
   defp put_headers(headers, request),
@@ -64,11 +66,11 @@ defmodule Ivar do
 
   defp prepare_auth(%{auth: {:bearer, token}} = request),
     do: put_header(request, "authorization", "bearer #{token}")
+    
+  defp prepare_auth(%{auth: {:basic, {user, pass}}} = request) do
+    auth = Base.encode64("#{user}:#{pass}")
+    put_header(request, "authorization", "basic #{auth}")
+  end
 
   defp prepare_auth(request), do: request
-
-  defp put_basic_auth(opts, %{auth: {:basic, credentials}}),
-    do: [hackney: [basic_auth: credentials]] ++ opts
-    
-  defp put_basic_auth(opts, _), do: opts
 end

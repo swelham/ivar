@@ -49,6 +49,22 @@ defmodule IvarTest do
     assert request.body == "<test>123</test>"
     assert Map.get(request.headers, "content-type") == "application/xml"
   end
+  
+  test "put_body/3 should encode and put known data types for a url encoded body" do
+    data_tests = [
+      %{some: 123, test: "abc"},
+      [some: 123, test: "abc"],
+      [{:some, 123}, {:test, "abc"}]
+    ]
+    
+    for data <- data_tests do
+      request = Ivar.new(:post, "")
+        |> Ivar.put_body(data, :url_encoded)
+      
+      assert request.body == "some=123&test=abc"
+      assert Map.get(request.headers, "content-type") == "application/x-www-form-urlencoded"
+    end
+  end
 
   test "put_body/3 should return error for get and delete requests" do
     methods = [:get, :delete]
@@ -60,7 +76,7 @@ defmodule IvarTest do
       assert request == {:error, "Body not allowed for #{Atom.to_string(method)} request"}
     end
   end
-
+  
   test "put_header/3 should put the header in the map headers list" do
     request = Ivar.new(:get, "")
       |> Ivar.put_header("x-test", "some_test")
@@ -70,14 +86,14 @@ defmodule IvarTest do
 
   test "put_auth/3 should put the bearer auth header" do
     request = Ivar.new(:get, "")
-      |> Ivar.put_auth(:bearer, "token")
+      |> Ivar.put_auth("token", :bearer)
 
     assert request.auth == {:bearer, "token"}
   end
 
   test "put_auth/3 should put the basic auth credentials" do
     request = Ivar.new(:get, "")
-      |> Ivar.put_auth(:basic, {"username", "password"})
+      |> Ivar.put_auth({"username", "password"}, :basic)
 
     assert request.auth == {:basic, {"username", "password"}}
   end
@@ -157,7 +173,7 @@ defmodule IvarTest do
 
       {:ok, result} =
         Ivar.new(method, test_url(bypass))
-        |> Ivar.put_auth(:bearer, "some.token")
+        |> Ivar.put_auth("some.token", :bearer)
         |> Ivar.send
       
       assert result.status_code == 200
@@ -169,14 +185,14 @@ defmodule IvarTest do
 
     for method <- methods do
       Bypass.expect bypass, fn conn ->
-        assert has_header(conn, {"authorization", "Basic dXNlcm5hbWU6cGFzc3dvcmQ="})
+        assert has_header(conn, {"authorization", "basic dXNlcm5hbWU6cGFzc3dvcmQ="})
 
         Plug.Conn.send_resp(conn, 200, "")
       end
 
       {:ok, result} =
         Ivar.new(method, test_url(bypass))
-        |> Ivar.put_auth(:basic, {"username", "password"})
+        |> Ivar.put_auth({"username", "password"}, :basic)
         |> Ivar.send
       
       assert result.status_code == 200
