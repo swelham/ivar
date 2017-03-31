@@ -223,6 +223,21 @@ defmodule IvarTest do
       
     assert result == %{"test" => "data"}
   end
+  
+  test "unpack/1 should decode a url encoded response", %{bypass: bypass} do
+    Bypass.expect bypass, fn conn ->
+      conn
+        |> Plug.Conn.put_resp_content_type("application/x-www-form-urlencoded")
+        |> Plug.Conn.send_resp(200, "test=data")
+    end
+    
+    {result, %HTTPoison.Response{}} =
+      Ivar.new(:get, test_url(bypass))
+      |> Ivar.send
+      |> Ivar.unpack
+      
+    assert result == %{"test" => "data"}
+  end
 
   defp test_url(bypass), do: "http://localhost:#{bypass.port}"
 
