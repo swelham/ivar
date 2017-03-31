@@ -65,6 +65,16 @@ defmodule IvarTest do
       assert Map.get(request.headers, "content-type") == "application/x-www-form-urlencoded"
     end
   end
+  
+  test "put_body/3 should encode and put known data types for a json body" do
+    data = %{some: 123, test: "abc"}
+    
+    request = Ivar.new(:post, "")
+      |> Ivar.put_body(data, :json)
+    
+    assert request.body == "{\"test\":\"abc\",\"some\":123}"
+    assert Map.get(request.headers, "content-type") == "application/json"
+  end
 
   test "put_body/3 should return error for get and delete requests" do
     methods = [:get, :delete]

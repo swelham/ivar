@@ -12,10 +12,8 @@ defmodule Ivar do
   def put_body(%{method: method}, _, _) when method in [:get, :delete],
     do: {:error, "Body not allowed for #{Atom.to_string(method)} request"}
 
-  def put_body(request, body, :url_encoded) when not is_binary(body) do
-    body = URI.encode_query(body)
-    put_body(request, body, :url_encoded)
-  end
+  def put_body(request, body, mime_type) when not is_binary(body),
+    do: put_body(request, encode_body(body, mime_type), mime_type)
 
   def put_body(request, body, mime_type) when is_atom(mime_type),
     do: put_body(request, body, get_mime_type(mime_type))
@@ -73,4 +71,7 @@ defmodule Ivar do
   end
 
   defp prepare_auth(request), do: request
+  
+  defp encode_body(body, :json),        do: Poison.encode!(body)
+  defp encode_body(body, :url_encoded), do: URI.encode_query(body)
 end

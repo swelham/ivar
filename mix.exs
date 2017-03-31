@@ -32,7 +32,14 @@ defmodule Ivar.Mixfile do
   defp deps do
     [
       {:httpoison, "~> 0.11.0"},
+      
+      # optional deps
+      {:poison, "~> 3.1", optional: true},
+      
+      # dev deps
       {:ex_doc, "~> 0.15.0", only: :dev},
+      
+      # test deps
       {:bypass, "~> 0.6.0", only: :test}
     ]
   end
