@@ -1,9 +1,7 @@
 defmodule IvarTest.Headers do
-  use ExUnit.Case
-  doctest Ivar
+  use ExUnit.Case, async: true
+  doctest Ivar.Headers
 
-  import Ivar.TestMacros
-  
   alias Ivar.Headers
   
   test "put_headers/2 should put single tuple header" do
@@ -38,9 +36,15 @@ defmodule IvarTest.Headers do
     assert result == %{headers: %{"header-1" => "one", "header_two" => "two"}}
   end
   
-  test "put_headers/3 should put key and value header" do
+  test "put_headers/3 should put binary key and value header" do
     result = Headers.put(%{}, "header-1", "one")
 
     assert result == %{headers: %{"header-1" => "one"}}
+  end
+  
+  test "put_headers/3 should put atom key and value header" do
+    result = Headers.put(%{}, :header_one, "one")
+
+    assert result == %{headers: %{"header_one" => "one"}}
   end
 end
