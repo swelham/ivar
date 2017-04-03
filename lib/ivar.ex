@@ -15,22 +15,22 @@ defmodule Ivar do
   """
   def new(method, url), do: %{method: method, url: url}
 
-  @doc """
-  """
-  def put_body(%{method: method}, _, _) when method in [:get, :delete],
-    do: {:error, "Body not allowed for #{Atom.to_string(method)} request"}
+  # @doc """
+  # """
+  # def put_body(%{method: method}, _, _) when method in [:get, :delete],
+  #   do: {:error, "Body not allowed for #{Atom.to_string(method)} request"}
 
-  def put_body(request, body, mime_type) when not is_binary(body),
-    do: put_body(request, encode_body(body, mime_type), mime_type)
+  # def put_body(request, body, mime_type) when not is_binary(body),
+  #   do: put_body(request, encode_body(body, mime_type), mime_type)
 
-  def put_body(request, body, mime_type) when is_atom(mime_type),
-    do: put_body(request, body, get_mime_type(mime_type))
+  # def put_body(request, body, mime_type) when is_atom(mime_type),
+  #   do: put_body(request, body, get_mime_type(mime_type))
 
-  def put_body(request, body, mime_type) do
-    request
-      |> Map.put(:body, body)
-      |> Headers.put("content-type", mime_type)
-  end
+  # def put_body(request, body, mime_type) do
+  #   request
+  #     |> Map.put(:body, body)
+  #     |> Headers.put("content-type", mime_type)
+  # end
 
   # @doc """
   # """
@@ -45,6 +45,7 @@ defmodule Ivar do
   def send(request) do
     request = request
       |> prepare_auth
+      |> prepare_body
 
     HTTPoison.request(
       request.method,
@@ -81,8 +82,14 @@ defmodule Ivar do
     
   defp prepare_auth(request), do: request
   
-  defp encode_body(body, :json),        do: Poison.encode!(body)
-  defp encode_body(body, :url_encoded), do: URI.encode_query(body)
+  defp prepare_body(%{body: body} = request) do
+    {_, header, content} = body
+    
+    request
+    |> Headers.put(header)
+    |> Map.put(:body, content)
+  end
+  defp prepare_body(request), do: request
   
   defp decode_body(body, nil), do: body
   defp decode_body(body, :json), do: Poison.decode!(body)

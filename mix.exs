@@ -31,6 +31,7 @@ defmodule Ivar.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
+      {:mimerl, "~> 1.0.2"},
       {:httpoison, "~> 0.11.0"},
       
       # optional deps
