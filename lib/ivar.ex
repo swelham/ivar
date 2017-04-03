@@ -32,13 +32,13 @@ defmodule Ivar do
       |> Headers.put("content-type", mime_type)
   end
 
-  @doc """
-  """
-  def put_auth(request, token, :bearer),
-    do: Map.put(request, :auth, {:bearer, token})
+  # @doc """
+  # """
+  # def put_auth(request, token, :bearer),
+  #   do: Map.put(request, :auth, {:bearer, token})
 
-  def put_auth(request, credentials, :basic),
-    do: Map.put(request, :auth, {:basic, credentials})
+  # def put_auth(request, credentials, :basic),
+  #   do: Map.put(request, :auth, {:basic, credentials})
 
   @doc """
   """
@@ -76,14 +76,9 @@ defmodule Ivar do
       
   defp get_mime_type(_), do: nil
 
-  defp prepare_auth(%{auth: {:bearer, token}} = request),
-    do: Headers.put(request, "authorization", "bearer #{token}")
+  defp prepare_auth(%{auth: {header, value}} = request),
+    do: Headers.put(request, header, value)
     
-  defp prepare_auth(%{auth: {:basic, {user, pass}}} = request) do
-    auth = Base.encode64("#{user}:#{pass}")
-    Headers.put(request, "authorization", "basic #{auth}")
-  end
-
   defp prepare_auth(request), do: request
   
   defp encode_body(body, :json),        do: Poison.encode!(body)

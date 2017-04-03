@@ -94,19 +94,19 @@ defmodule IvarTest do
   #   assert Map.get(request.headers, "x-test") == "some_test"
   # end
 
-  test "put_auth/3 should put the bearer auth header" do
-    request = Ivar.new(:get, "")
-      |> Ivar.put_auth("token", :bearer)
+  # test "put_auth/3 should put the bearer auth header" do
+  #   request = Ivar.new(:get, "")
+  #     |> Ivar.put_auth("token", :bearer)
 
-    assert request.auth == {:bearer, "token"}
-  end
+  #   assert request.auth == {:bearer, "token"}
+  # end
 
-  test "put_auth/3 should put the basic auth credentials" do
-    request = Ivar.new(:get, "")
-      |> Ivar.put_auth({"username", "password"}, :basic)
+  # test "put_auth/3 should put the basic auth credentials" do
+  #   request = Ivar.new(:get, "")
+  #     |> Ivar.put_auth({"username", "password"}, :basic)
 
-    assert request.auth == {:basic, {"username", "password"}}
-  end
+  #   assert request.auth == {:basic, {"username", "password"}}
+  # end
 
   test "send/1 should send minimal empty request", %{bypass: bypass} do
     methods = [:get, :post, :patch, :put, :delete]
@@ -183,7 +183,7 @@ defmodule IvarTest do
 
       {:ok, result} =
         Ivar.new(method, test_url(bypass))
-        |> Ivar.put_auth("some.token", :bearer)
+        |> Ivar.Auth.put("some.token", :bearer)
         |> Ivar.send
       
       assert result.status_code == 200
@@ -202,7 +202,7 @@ defmodule IvarTest do
 
       {:ok, result} =
         Ivar.new(method, test_url(bypass))
-        |> Ivar.put_auth({"username", "password"}, :basic)
+        |> Ivar.Auth.put({"username", "password"}, :basic)
         |> Ivar.send
       
       assert result.status_code == 200

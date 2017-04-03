@@ -1,10 +1,10 @@
 defmodule Ivar.Headers do
   @moduledoc """
-  Ivar.Headers manages the headers stored inside of the headers map
+  Ivar.Headers manages the request headers used for a request
   """
   
   @doc """
-  Puts the given `headers` into existing the `request` map
+  Puts the given `headers` into the existing `request` map
   
   Args
   
