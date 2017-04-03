@@ -1,4 +1,6 @@
 defmodule Ivar do
+  alias Ivar.Headers
+  
   @moduledoc """
   Documentation for Ivar.
   """
@@ -27,16 +29,7 @@ defmodule Ivar do
   def put_body(request, body, mime_type) do
     request
       |> Map.put(:body, body)
-      |> put_header("content-type", mime_type)
-  end
-
-  @doc """
-  """
-  def put_header(request, key, value) do
-    request
-      |> Map.get(:headers, %{})
-      |> Map.put(key, value)
-      |> put_headers(request)
+      |> Headers.put("content-type", mime_type)
   end
 
   @doc """
@@ -70,9 +63,6 @@ defmodule Ivar do
     {data, response}
   end
 
-  defp put_headers(headers, request),
-    do: Map.put(request, :headers, headers)
-
   defp get_mime_type(type) when is_atom(type),
     do: Map.get(@mime_types, type)
     
@@ -87,11 +77,11 @@ defmodule Ivar do
   defp get_mime_type(_), do: nil
 
   defp prepare_auth(%{auth: {:bearer, token}} = request),
-    do: put_header(request, "authorization", "bearer #{token}")
+    do: Headers.put(request, "authorization", "bearer #{token}")
     
   defp prepare_auth(%{auth: {:basic, {user, pass}}} = request) do
     auth = Base.encode64("#{user}:#{pass}")
-    put_header(request, "authorization", "basic #{auth}")
+    Headers.put(request, "authorization", "basic #{auth}")
   end
 
   defp prepare_auth(request), do: request
