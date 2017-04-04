@@ -55,6 +55,6 @@ defmodule Ivar.Files do
   defp put_in_request(files, request),
     do: Map.put(request, :files, files)
   
-  defp is_valid?(%{body: body}) when body in @valid_types, do: true
+  defp is_valid?(%{body: {type, _, _}}) when type in @valid_types, do: true
   defp is_valid?(request), do: request[:body] == nil
 end

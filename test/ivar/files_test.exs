@@ -32,10 +32,20 @@ defmodule IvarTest.Files do
     assert result == %{files: expect}
   end
   
+  test "put/2 should put file into existing :url_encoded request body", %{file_data: file_data} do
+    expect = file_component("test", file_data, "test.jpg", "image/jpeg")
+    
+    result = %{}
+    |> Ivar.Body.put(%{test: 123}, :url_encoded)
+    |> Files.put({"test", file_data, "test.jpg", "jpg"})
+    
+    assert result.files == [expect]
+  end
+  
   test "put/2 should return error tuple when request is not url_encoded or multipart" do
     result = %{}
     |> Ivar.Body.put(%{test: 123}, :json)
-    |> Files.put({"test2", "some plain text", "test2.txt", "text"})
+    |> Files.put({"test", "", "test.jpg", "jpg"})
     
     assert result == {:error, "Files can only be put into a :url_encoded or :multipart body"}
   end
