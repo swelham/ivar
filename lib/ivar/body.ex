@@ -40,7 +40,7 @@ defmodule Ivar.Body do
     type =
       if Regex.match?(~r/\//, type),
         do: type,
-        else: get_mime(type)
+        else: :mimerl.extension(type)
 
     header = content_header(type)
     
@@ -52,7 +52,4 @@ defmodule Ivar.Body do
   
   defp content_header(type),
     do: {"content-type", type}
-    
-  defp get_mime(type) when is_binary(type),
-    do: :mimerl.extension(type)
 end
