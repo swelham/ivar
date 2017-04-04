@@ -1,7 +1,9 @@
 defmodule Ivar.Body do
   @moduledoc """
-  Ivar.Body manages the body content used for a request
+  `Ivar.Body` manages the body content used for a request
   """
+
+  alias Ivar.Utilities
   
   @doc """
   Puts the given `content` for the `content_type` into the existing `request` map
@@ -37,10 +39,7 @@ defmodule Ivar.Body do
     do: put_body(request, content, "application/x-www-form-urlencoded", :url_encoded)
   
   defp put_body(request, content, type, known_type \\ nil) when is_binary(content) do
-    type =
-      if Regex.match?(~r/\//, type),
-        do: type,
-        else: :mimerl.extension(type)
+    type = Utilities.get_mime_type(type)
 
     header = content_header(type)
     

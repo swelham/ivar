@@ -1,6 +1,6 @@
 defmodule Ivar.Auth do
   @moduledoc """
-  Ivar.Auth manages the authentication credentials used for a request
+  `Ivar.Auth` manages the authentication credentials used for a request
   """
   
   @doc """

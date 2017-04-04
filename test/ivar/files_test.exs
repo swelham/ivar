@@ -40,6 +40,15 @@ defmodule IvarTest.Files do
     assert result == {:error, "Files can only be put into a :url_encoded or :multipart body"}
   end
   
+  test "put/2 should put a file with custom mime type into request map", %{file_data: file_data} do
+    expect = file_component("test", file_data, "test.jpg", "custom/type")
+    
+    result = Files.put(%{}, {"test", file_data, "test.jpg", "custom/type"})
+    
+    assert result == %{files: [expect]}
+  end
+  
+  
   defp file_component(name, data, file_name, type) do
     {
       name,

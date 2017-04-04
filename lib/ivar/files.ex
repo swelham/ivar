@@ -1,7 +1,9 @@
 defmodule Ivar.Files do
   @moduledoc """
-  Ivar.Files manages the files to be sent for a request
+  `Ivar.Files` manages the files to be sent for a request
   """
+  
+  alias Ivar.Utilities
   
   @valid_types [nil, :multipart, :url_encoded]
   
@@ -42,7 +44,7 @@ defmodule Ivar.Files do
       name,
       IO.iodata_to_binary(data),
       {"form-data", [{"name", name}, {"filename", file_name}]},
-      [{"content-type", :mimerl.extension(type)}]
+      [{"content-type", Utilities.get_mime_type(type)}]
     }
     
     put_files([file | files], rest)

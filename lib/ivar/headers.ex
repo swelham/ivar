@@ -1,6 +1,6 @@
 defmodule Ivar.Headers do
   @moduledoc """
-  Ivar.Headers manages the request headers used for a request
+  `Ivar.Headers` manages the request headers used for a request
   """
   
   @doc """
