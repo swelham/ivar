@@ -3,6 +3,7 @@ defmodule IvarTest.Body do
   doctest Ivar.Body
 
   alias Ivar.Body
+  alias Ivar.Files
   
   test "put/3 should put body for a mime extension" do
     result = Body.put(%{}, "some text", "text")
@@ -36,5 +37,25 @@ defmodule IvarTest.Body do
       
     assert Body.put(%{}, "some=data", :url_encoded) ==
       %{body: {:url_encoded, {"content-type", "application/x-www-form-urlencoded"}, "some=data"}}
+  end
+  
+  test "put/3 should put :url_encoded body when request has files attached" do
+    data = %{some: "content"}
+    
+    result = %{}
+    |> Files.put({"test", "", "test.jpg", "jpg"})
+    |> Body.put(data, :url_encoded)
+    
+    assert result.body == {:url_encoded, {"content-type", "application/x-www-form-urlencoded"}, "some=content"}
+  end
+  
+  test "put/3 should return error when putting non :url_encoded body when request has files attached" do
+    data = %{some: "content"}
+    
+    result = %{}
+    |> Files.put({"test", "", "test.jpg", "jpg"})
+    |> Body.put(data, :json)
+    
+    assert result == {:error, "Body must be of type :url_encoded when files are attached"}
   end
 end
