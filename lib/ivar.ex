@@ -1,9 +1,9 @@
 defmodule Ivar do
-  alias Ivar.Headers
-  
   @moduledoc """
   Documentation for Ivar.
   """
+  
+  alias Ivar.Headers
   
   @mime_types %{
     json: "application/json",
@@ -46,7 +46,7 @@ defmodule Ivar do
     request = request
       |> prepare_auth
       |> prepare_body
-
+#
     HTTPoison.request(
       request.method,
       request.url,
@@ -82,6 +82,18 @@ defmodule Ivar do
     
   defp prepare_auth(request), do: request
   
+  defp prepare_body(%{files: files} = request) do
+    content = request
+    |> Map.get(:body, "")
+    |> is_body_valid?(:url_encoded)
+    |> decode_body(:url_encoded)
+    |> Enum.reduce([], fn (f, acc) -> [f | acc] end)
+    |> Kernel.++(files)
+    
+    request
+    |> Map.put(:body, {:multipart, content})
+    |> Map.drop([:files])
+  end
   defp prepare_body(%{body: body} = request) do
     {_, header, content} = body
     
@@ -96,11 +108,17 @@ defmodule Ivar do
   defp decode_body(body, :url_encoded), do: URI.decode_query(body)
   
   defp get_content_type(headers) do
-    Enum.find(headers, &is_content_type_header/1)
+    Enum.find(headers, &is_content_type_header?/1)
       |> elem(1)
       |> get_mime_type
   end
   
-  defp is_content_type_header({k, _}),
+  defp is_content_type_header?({k, _}),
     do: String.downcase(k) == "content-type"
+    
+  defp is_body_valid?("", _), do: ""
+  defp is_body_valid?({type, _, content}, target_type) when type == target_type,
+    do: content
+  defp is_body_valid?({type, _, _}, target_type),
+    do: {:error, "Body type was expected to be '#{target_type}' but is #{type}'"}
 end

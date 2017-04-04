@@ -119,6 +119,49 @@ defmodule IvarTest do
     end
   end
 
+  test "send/1 should send request with files attached", %{bypass: bypass} do
+    Bypass.expect bypass, fn conn ->
+      {:ok, body, _} = Plug.Conn.read_body(conn)
+      
+      assert body != nil
+      assert has_header(conn, {"content-length", "10322"})
+      assert has_multipart_header(conn)
+      
+      Plug.Conn.send_resp(conn, 200, "")
+    end
+    
+    file_data = File.read!("test/fixtures/elixir.png")
+    
+    {:ok, result} =
+      Ivar.new(:post, test_url(bypass))
+      |> Ivar.Files.put({"file", file_data, "elixir.png", "png"})
+      |> Ivar.send
+      
+    assert result.status_code == 200
+  end
+    @tag me: true
+  test "send/1 should send request with files and body", %{bypass: bypass} do
+    Bypass.expect bypass, fn conn ->
+      {:ok, body, _} = Plug.Conn.read_body(conn)
+
+      assert body != nil
+      assert has_header(conn, {"content-length", "10481"})
+      assert has_multipart_header(conn)
+      
+      Plug.Conn.send_resp(conn, 200, "")
+    end
+    
+    file_data = File.read!("test/fixtures/elixir.png")
+    
+    {:ok, result} =
+      Ivar.new(:post, test_url(bypass))
+      |> Ivar.Body.put(%{test: "data"}, :url_encoded)
+      |> Ivar.Files.put({"file", file_data, "elixir.png", "png"})
+      |> Ivar.send
+      
+    assert result.status_code == 200
+  end
+  
   test "unpack/1 should decode a json response", %{bypass: bypass} do
     Bypass.expect bypass, fn conn ->
       conn
