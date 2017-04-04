@@ -20,10 +20,6 @@ defmodule Ivar.Files do
   * tuple - `{"field_name", "some iodata", "file_name.txt", "text"}`
   * list - a list of tuples in the same format as above
   """
-  # Usage
-  #     iex> file_data = File.read!("test/fixtures/elixir.png")
-  #     iex> Ivar.Files.put(%{}, {"elixir", file_data, "elixir.png", "png"})
-  #     %{files: [{"elixir", , {"form-data", [{"name", "elixir"}, {"filename", "elixir.png"}]}, [{"content-type", "image/png"}]}]}
   @spec put(map, {tuple | list}) :: map | {:error, binary}
   def put(request, files) when is_tuple(files),
     do: put(request, [files])
