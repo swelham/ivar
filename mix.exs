@@ -35,7 +35,7 @@ defmodule Ivar.Mixfile do
       {:httpoison, "~> 0.11.0"},
       
       # optional deps
-      {:poison, "~> 3.1", optional: true},
+      {:poison, "~> 2.0 or ~> 3.0", optional: true},
       
       # dev deps
       {:ex_doc, "~> 0.15.0", only: :dev},
