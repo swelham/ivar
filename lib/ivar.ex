@@ -113,10 +113,12 @@ defmodule Ivar do
     [ctype | _] = String.split(type, ";")
 
     @mime_types
-      |> Enum.find(fn {_, v} -> v == ctype end)
-      |> elem(0)
+    |> Enum.find(fn {_, v} -> v == ctype end)
+    |> case do
+      nil -> nil
+      {k, _} -> k
+    end
   end
-      
   defp get_mime_type(_), do: nil
 
   defp prepare_auth(%{auth: {header, value}} = request),

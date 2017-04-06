@@ -215,7 +215,22 @@ defmodule IvarTest do
       
     assert result == %{"test" => "data"}
   end
-  
+
+  test "unpack/1 should return raw response when unknown content type", %{bypass: bypass} do
+    Bypass.expect bypass, fn conn ->
+      conn
+        |> Plug.Conn.put_resp_content_type("unknown/type")
+        |> Plug.Conn.send_resp(200, "test=data")
+    end
+    
+    {result, %HTTPoison.Response{}} =
+      Ivar.new(:get, test_url(bypass))
+      |> Ivar.send
+      |> Ivar.unpack
+      
+    assert result == "test=data"
+  end
+
   test "unpack/1 should return error when receiving an HTTPoison.Error" do
     test_error = {:error, %HTTPoison.Error{id: 1, reason: "test_error"}}
     
