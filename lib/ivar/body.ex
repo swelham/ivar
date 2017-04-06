@@ -19,6 +19,7 @@ defmodule Ivar.Body do
       iex> Ivar.Body.put(%{}, %{name: "value"}, :url_encoded)
       %{body: {:url_encoded, {"content-type", "application/x-www-form-urlencoded"}, "name=value"}}
   """
+  @spec put(map, {map | list | binary}, atom | binary) :: map
   def put(%{files: files}, _, content_type) when content_type != :url_encoded,
     do: {:error, "Body must be of type :url_encoded when files are attached"}
   def put(request, content, content_type),

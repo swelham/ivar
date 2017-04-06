@@ -17,7 +17,31 @@ defmodule IvarTest do
     assert Ivar.new(:patch,  "http://example.com") == %{method: :patch, url: "http://example.com"}
     assert Ivar.new(:delete, "http://example.com") == %{method: :delete, url: "http://example.com"}
   end
-
+  
+  test "put_auth/3 delegate to Ivar.Auth.put/3" do
+    result = Ivar.put_auth(%{}, "token", :bearer)
+    
+    assert result == %{auth: {"authorization", "bearer token"}}
+  end
+  
+  test "put_headers/3 delegate to Ivar.Headers.put/3" do
+    result = Ivar.put_headers(%{}, {"header", "value"})
+    
+    assert result == %{headers: %{"header" => "value"}}
+  end
+  
+  test "put_body/3 delegate to Ivar.Body.put/3" do
+    result = Ivar.put_body(%{}, "some text", "text")
+    
+    assert result == %{body: {"text/plain", {"content-type", "text/plain"}, "some text"}}
+  end
+  
+  test "put_files/3 delegate to Ivar.Files.put/3" do
+    result = Ivar.put_files(%{}, {"file", "some text", "test.txt", "text"})
+    
+    assert result == %{files: [{"file", "some text", {"form-data", [{"name", "file"}, {"filename", "test.txt"}]}, [{"content-type", "text/plain"}]}]}
+  end
+  
   test "send/1 should send minimal empty request", %{bypass: bypass} do
     methods = [:get, :post, :patch, :put, :delete]
 
