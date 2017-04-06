@@ -58,7 +58,7 @@ This is simplified extract from a real world application where Ivar is being use
 send email via the mailgun service.
 
 ```elixir
-url = "https://api.mailgun.net/v3/m.welham.online/messages"
+url = "https://api.mailgun.net/v3/domain.com/messages"
 mail_data = %{to: "someone@example.com", ...}
 files = [{"inline", File.read!("elixir.png"), "elixir.png", "png"}, ...]
 
