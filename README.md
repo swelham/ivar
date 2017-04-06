@@ -1,4 +1,4 @@
-[![Deps Status](https://beta.hexfaktor.org/badge/all/github/swelham/ivar.svg?branch=master)](https://beta.hexfaktor.org/github/swelham/ivar) [![Hex Version](https://img.shields.io/hexpm/v/ivar.svg)](https://hex.pm/packages/ivar) [![Join the chat at https://gitter.im/swelham/ivar](https://badges.gitter.im/swelham/ivar.svg)](https://gitter.im/swelham/ivar?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/swelham/ivar.svg?branch=master)](https://travis-ci.org/swelham/ivar) [![Deps Status](https://beta.hexfaktor.org/badge/all/github/swelham/ivar.svg?branch=master)](https://beta.hexfaktor.org/github/swelham/ivar) [![Hex Version](https://img.shields.io/hexpm/v/ivar.svg)](https://hex.pm/packages/ivar) [![Join the chat at https://gitter.im/swelham/ivar](https://badges.gitter.im/swelham/ivar.svg)](https://gitter.im/swelham/ivar?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # Ivar
 
