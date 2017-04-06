@@ -2,7 +2,9 @@
 
 # Ivar
 
-Ivar is a light weight wrapper around HTTPoison that provides a fluent and composable way to build http requests
+Ivar is a lightweight wrapper around HTTPoison that provides a fluent and composable way to build http requests.
+The key goals of Ivar is to allow requests to be constructed in a composable manner (pipeline friendly) and to 
+simplify building, sending and receiving requests.
 
 ## Usage
 
@@ -10,28 +12,59 @@ Add `ivar` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:ivar, "~> 0.1.0"}]
+  [{:ivar, "~> 0.2.0"}]
 end
 ```
 
-You can then start to build http requests in a fluent nature
+### Basic usage
+
 
 ```elixir
-defmodule IvarExample do
-  def send_some_request do
-    result = 
-      Ivar.new(:post, "http://example.com")
-      |> Ivar.put_auth(:bearer, "some_token")
-      |> Ivar.put_body("{\"testing\": 123}", :json)
-      |> Ivar.send
-
-    case result do
-      {:ok, response} -> # the normal %HTTPoison.Response{} data
-        IO.inspect response
-      {:error, error} -> # the normal %HTTPoison.Error{} data
-        IO.inspect error
-    end
-  end
-end
+Ivar.new(:get, "https://example.com")
+|> Ivar.send
+|> Ivar.unpack
+# {"<!doctype html>\n<html>...", %HTTPoison.Response{}}
 ```
 
+### JSON encoding/decoding
+
+Ivar uses the `Poison` library for encoding and decoding JSON, so make sure you
+have it listed along side Ivar in your `mix.exs`.
+
+```elixir
+def deps do
+  [
+    {:ivar, "~> 0.2.0"},
+    {:poison, "~> 3.0"}
+  ]
+end
+```
+You can then specify that you want to send JSON when putting the request body. If 
+the response contains the `application/json` content type header, the `Ivar.unpack` 
+function will then decode the response for you.
+
+```elixir
+Ivar.new(:post, "https://some-echo-server")
+|> Ivar.put_body(%{some: "data"}, :json)
+|> Ivar.send
+|> Ivar.unpack
+# {%{some: "data"}, %HTTPoison.Response{}}
+```
+
+
+### Real world example
+
+This is simplified extract from a real world application where Ivar is being used to
+send email via the mailgun service.
+
+```elixir
+url = "https://api.mailgun.net/v3/m.welham.online/messages"
+mail_data = %{to: "someone@example.com", ...}
+files = [{"inline", File.read!("elixir.png"), "elixir.png", "png"}, ...]
+
+Ivar.new(:post, url)
+|> Ivar.put_auth({"api", "mailgun_api_key"}, :basic)
+|> Ivar.put_body(mail_data, :url_encoded)
+|> Ivar.put_files(files)
+|> Ivar.send
+```
