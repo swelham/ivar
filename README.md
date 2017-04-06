@@ -2,6 +2,8 @@
 
 # Ivar
 
+[![Join the chat at https://gitter.im/swelham/ivar](https://badges.gitter.im/swelham/ivar.svg)](https://gitter.im/swelham/ivar?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Ivar is a light weight wrapper around HTTPoison that provides a fluent and composable way to build http requests
 
 ## Usage
