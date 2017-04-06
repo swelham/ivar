@@ -191,6 +191,14 @@ defmodule IvarTest do
       
     assert result == %{"test" => "data"}
   end
+  
+  test "unpack/1 should return error when receiving an HTTPoison.Error" do
+    test_error = {:error, %HTTPoison.Error{id: 1, reason: "test_error"}}
+    
+    result = Ivar.unpack(test_error)
+    
+    assert result == test_error
+  end
 
   defp test_url(bypass), do: "http://localhost:#{bypass.port}"
 

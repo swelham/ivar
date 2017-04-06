@@ -1,6 +1,6 @@
 defmodule Ivar do
   @moduledoc """
-  Documentation for Ivar.
+  Ivar is the top level module used to compose HTTP requests.
   """
   
   alias Ivar.Headers
@@ -12,41 +12,40 @@ defmodule Ivar do
   }
 
   @doc """
+  Creates a new request map for the given HTTP `method` and `url`
+  
+  Args
+  
+    * `method` - the HTTP method as an atom (`:get`, `:post`, `:delete`, etc...)
+    * `url` - a binary containing the full url (e.g. `https://example.com`)
+    
+  Usages
+  
+      iex> Ivar.new(:get, "https://example.com")
+      %{method: :get, url: "https://example.com"}
   """
+  @spec new(atom, binary) :: map
   def new(method, url), do: %{method: method, url: url}
 
-  # @doc """
-  # """
-  # def put_body(%{method: method}, _, _) when method in [:get, :delete],
-  #   do: {:error, "Body not allowed for #{Atom.to_string(method)} request"}
-
-  # def put_body(request, body, mime_type) when not is_binary(body),
-  #   do: put_body(request, encode_body(body, mime_type), mime_type)
-
-  # def put_body(request, body, mime_type) when is_atom(mime_type),
-  #   do: put_body(request, body, get_mime_type(mime_type))
-
-  # def put_body(request, body, mime_type) do
-  #   request
-  #     |> Map.put(:body, body)
-  #     |> Headers.put("content-type", mime_type)
-  # end
-
-  # @doc """
-  # """
-  # def put_auth(request, token, :bearer),
-  #   do: Map.put(request, :auth, {:bearer, token})
-
-  # def put_auth(request, credentials, :basic),
-  #   do: Map.put(request, :auth, {:basic, credentials})
-
   @doc """
+  Sends the given HTTP `request`
+  
+  Args
+  
+    * `request` - the map containing the request options to send, usually created via `Ivar.new/2`
+  
+  Usage
+  
+      Ivar.new(:get, "https://example.com")
+      |> Ivar.send
+      # {:ok, %HTTPoison.Response{}}
   """
+  @spec send(map) :: {:ok, HTTPoison.Response.t} | {:error, HTTPoison.Error.t}
   def send(request) do
     request = request
       |> prepare_auth
       |> prepare_body
-#
+
     HTTPoison.request(
       request.method,
       request.url,
@@ -56,13 +55,28 @@ defmodule Ivar do
   end
   
   @doc """
+  Receives the result of `Ivar.send/1` and attempts to decode the response body using the
+  `content-type` header included in the HTTP response
+  
+  Args
+    
+    * `response` - an HTTPoison success or failure response
+    
+  Usage
+    
+      Ivar.new(:get, "https://example.com")
+      |> Ivar.send
+      |> Ivar.unpack
+      # {"<!doctype html><html>...", %HTTPoison.Response{}}
   """
+  @spec unpack(atom) :: {binary | map, HTTPoison.Response.t} | {:error, HTTPoison.Error.t}
   def unpack({:ok, %HTTPoison.Response{body: body} = response}) do
     ctype = get_content_type(response.headers)
     data = decode_body(body, ctype)
     
     {data, response}
   end
+  def unpack(response), do: response
 
   defp get_mime_type(type) when is_atom(type),
     do: Map.get(@mime_types, type)
