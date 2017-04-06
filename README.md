@@ -1,3 +1,5 @@
+[![Deps Status](https://beta.hexfaktor.org/badge/all/github/swelham/ivar.svg?branch=master)](https://beta.hexfaktor.org/github/swelham/ivar) [![Hex Version](https://img.shields.io/hexpm/v/ivar.svg)](https://hex.pm/packages/ivar)
+
 # Ivar
 
 Ivar is a light weight wrapper around HTTPoison that provides a fluent and composable way to build http requests
