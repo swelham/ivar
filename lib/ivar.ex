@@ -35,7 +35,7 @@ defmodule Ivar do
     do: Ivar.Auth.put(request, credentials, auth_type)
     
   @doc """
-  Delegates to `Ivar.Headers.put/3`
+  Delegates to `Ivar.Headers.put/2`
   """
   @spec put_headers(map, {tuple | Keyword.t | map}) :: map
   def put_headers(request, headers),
@@ -49,7 +49,7 @@ defmodule Ivar do
     do: Ivar.Body.put(request, content, content_type)
   
   @doc """
-  Delegates to `Ivar.Files.put/3`
+  Delegates to `Ivar.Files.put/2`
   """
   @spec put_files(map, {tuple | list}) :: map | {:error, binary}
   def put_files(request, files),
