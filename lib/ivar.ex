@@ -76,15 +76,18 @@ defmodule Ivar do
   @spec send(map) :: {:ok, HTTPoison.Response.t} | {:error, HTTPoison.Error.t}
   def send(request) do
     request = request
-      |> prepare_auth
-      |> prepare_body
+    |> prepare_auth
+    |> prepare_body
+
+    opts = []
+    |> prepare_opts
 
     HTTPoison.request(
       request.method,
       request.url,
       Map.get(request, :body, ""),
       Map.get(request, :headers, []),
-      [])
+      opts)
   end
 
   @doc """
@@ -152,6 +155,13 @@ defmodule Ivar do
     |> Map.put(:body, content)
   end
   defp prepare_body(request), do: request
+
+  defp prepare_opts(opts) do
+    case Application.get_env(:ivar, :http) do
+      nil -> opts
+      http -> http || [] ++ opts
+    end
+  end
 
   defp decode_body(body, nil), do: body
   defp decode_body(body, :json), do: Poison.decode!(body)

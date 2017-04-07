@@ -68,3 +68,16 @@ Ivar.new(:post, url)
 |> Ivar.put_files(files)
 |> Ivar.send
 ```
+### HTTPoison options
+
+You can specify any of the valid HTTPoison options under the `:http` key of the `:ivar` application inside of your config file. These options will be passed into HTTPoison when you call `Ivar.send`.
+
+Example config:
+
+```elixir
+# config/config.exs
+config :ivar,
+  http: [
+    timeout: 10_000
+  ]
+```

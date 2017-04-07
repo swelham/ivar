@@ -163,7 +163,7 @@ defmodule IvarTest do
       
     assert result.status_code == 200
   end
-    @tag me: true
+
   test "send/1 should send request with files and body", %{bypass: bypass} do
     Bypass.expect bypass, fn conn ->
       {:ok, body, _} = Plug.Conn.read_body(conn)
@@ -183,6 +183,20 @@ defmodule IvarTest do
       |> Ivar.Files.put({"file", file_data, "elixir.png", "png"})
       |> Ivar.send
       
+    assert result.status_code == 200
+  end
+  @tag me: true
+  test "send/1 should use http options specified in application config", %{bypass: bypass} do
+    Bypass.expect bypass, fn conn ->
+      assert conn.query_string == "q=ivar"
+
+      Plug.Conn.send_resp(conn, 200, "")
+    end
+
+    {:ok, result} =
+      Ivar.new(:get, test_url(bypass))
+      |> Ivar.send
+
     assert result.status_code == 200
   end
   
@@ -239,7 +253,7 @@ defmodule IvarTest do
     assert result == test_error
   end
 
-  defp test_url(bypass), do: "http://localhost:#{bypass.port}"
+  defp test_url(bypass), do: "http://localhost:#{bypass.port}/"
 
   defp method_type(:get),     do: "GET"
   defp method_type(:post),    do: "POST"
