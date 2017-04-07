@@ -2,7 +2,7 @@ defmodule Ivar.Utilities do
   @moduledoc """
   `Ivar.Utilities` is a collection of utility functions used for building requests
   """
-  
+
   @doc """
   Returns the mime type for a given `type`
   

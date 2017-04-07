@@ -4,7 +4,7 @@ defmodule Ivar.Body do
   """
 
   alias Ivar.Utilities
-  
+
   @doc """
   Puts the given `content` for the `content_type` into the existing `request` map
   
@@ -24,7 +24,7 @@ defmodule Ivar.Body do
     do: {:error, "Body must be of type :url_encoded when files are attached"}
   def put(request, content, content_type),
     do: put_body(request, content, content_type)
-    
+
   defp put_body(request, content, :json) when not is_binary(content) do
     case Poison.encode(content) do
       {:ok, body} -> put_body(request, body, :json)
@@ -33,25 +33,25 @@ defmodule Ivar.Body do
   end
   defp put_body(request, content, :json),
     do: put_body(request, content, "json", :json)
-  
+
   defp put_body(request, content, :url_encoded) when not is_binary(content) do
     body = URI.encode_query(content)
     put_body(request, body, :url_encoded)
   end
   defp put_body(request, content, :url_encoded),
     do: put_body(request, content, "application/x-www-form-urlencoded", :url_encoded)
-  
+
   defp put_body(request, content, type, known_type \\ nil) when is_binary(content) do
     type = Utilities.get_mime_type(type)
 
     header = content_header(type)
-    
+
     body = {known_type || type, header, content}
-    
+
     request
     |> Map.put(:body, body)
   end
-  
+
   defp content_header(type),
     do: {"content-type", type}
 end

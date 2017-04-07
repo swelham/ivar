@@ -2,7 +2,7 @@ defmodule Ivar.Headers do
   @moduledoc """
   `Ivar.Headers` manages the request headers used for a request
   """
-  
+
   @doc """
   Puts the given `headers` into the existing `request` map
   
@@ -33,7 +33,7 @@ defmodule Ivar.Headers do
     |> put_headers(headers)
     |> put_in_request(request)
   end
-  
+
   @doc """
   Puts the given `value` under `key` into the `request` headers map
   
@@ -51,7 +51,7 @@ defmodule Ivar.Headers do
   @spec put(map, {atom | binary}, binary) :: map
   def put(request, key, value),
     do: put(request, [{key, value}])
-  
+
   defp put_headers(acc, headers) when is_map(headers) do
     headers = Enum.into(headers, [])
     put_headers(acc, headers)
@@ -59,15 +59,15 @@ defmodule Ivar.Headers do
   defp put_headers(acc, []), do: acc
   defp put_headers(acc, [{k, v} | rest]) do
     key = key_to_string(k)
-    
+
     acc
     |> Map.put(key, v)
     |> put_headers(rest)
   end
-  
+
   defp put_in_request(headers, request),
     do: Map.put(request, :headers, headers)
-    
+
   defp key_to_string(key) when is_atom(key),
     do: Atom.to_string(key)
   defp key_to_string(key) when is_binary(key),

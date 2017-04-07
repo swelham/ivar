@@ -2,11 +2,11 @@ defmodule Ivar.Files do
   @moduledoc """
   `Ivar.Files` manages the files to be sent for a request
   """
-  
+
   alias Ivar.Utilities
-  
+
   @valid_types [nil, :multipart, :url_encoded]
-  
+
   @doc """
   Puts the given `files` into the existing `request` map
   
@@ -39,7 +39,7 @@ defmodule Ivar.Files do
       {:error, "Files can only be put into a :url_encoded or :multipart body"}
     end
   end
-  
+
   defp put_files(files, []), do: files
   defp put_files(files, [{name, data, file_name, type} | rest]) do
     file = {
@@ -48,13 +48,13 @@ defmodule Ivar.Files do
       {"form-data", [{"name", name}, {"filename", file_name}]},
       [{"content-type", Utilities.get_mime_type(type)}]
     }
-    
+
     put_files([file | files], rest)
   end
-  
+
   defp put_in_request(files, request),
     do: Map.put(request, :files, files)
-  
+
   defp is_valid?(%{body: {type, _, _}}) when type in @valid_types, do: true
   defp is_valid?(request), do: request[:body] == nil
 end
