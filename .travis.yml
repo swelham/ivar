@@ -4,4 +4,4 @@ elixir:
 env: MIX_ENV=test
 otp_release:
   - 19.0
-after_script: mix credo --strict
+script: mix test && mix credo --strict
