@@ -39,8 +39,7 @@ defmodule Ivar.Mixfile do
       
       # dev deps
       {:ex_doc, "~> 0.15.0", only: :dev},
-      
-      # test deps
+      {:credo, "~> 0.7.2", only: [:dev, :test]},
       {:bypass, "~> 0.6.0", only: :test}
     ]
   end
