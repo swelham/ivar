@@ -168,10 +168,13 @@ defmodule Ivar do
   defp decode_body(body, :url_encoded), do: URI.decode_query(body)
 
   defp get_content_type(headers) do
-    headers
-    |> Enum.find(&is_content_type_header?/1)
-    |> elem(1)
-    |> get_mime_type
+    with {_, v} <- Enum.find(headers, &is_content_type_header?/1),
+         type   <- get_mime_type(v)
+    do
+      type
+    else
+      nil
+    end
   end
 
   defp is_content_type_header?({k, _}),
