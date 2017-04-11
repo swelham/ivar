@@ -115,6 +115,9 @@ defmodule Ivar do
   end
   def unpack(response), do: response
 
+  defp get_mime_type({_, type}),
+    do: get_mime_type(type)
+
   defp get_mime_type(type) when is_atom(type),
     do: Map.get(@mime_types, type)
 
@@ -168,13 +171,9 @@ defmodule Ivar do
   defp decode_body(body, :url_encoded), do: URI.decode_query(body)
 
   defp get_content_type(headers) do
-    with {_, v} <- Enum.find(headers, &is_content_type_header?/1),
-         type   <- get_mime_type(v)
-    do
-      type
-    else
-      nil
-    end
+    headers
+    |> Enum.find(&is_content_type_header?/1)
+    |> get_mime_type
   end
 
   defp is_content_type_header?({k, _}),
