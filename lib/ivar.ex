@@ -33,13 +33,13 @@ defmodule Ivar do
   """
   @spec new(atom, binary, Keyword.t) :: map
   def new(method, url, opts \\ []) do
-    opts = 
-      Application.get_env(:ivar, :http, [])
-      |> Keyword.merge(opts)
-    
+    opts = :ivar
+    |> Application.get_env(:http, [])
+    |> Keyword.merge(opts)
+
     %{method: method, url: url, opts: opts}
   end
-  
+
   @doc """
   Delegates to `Ivar.Auth.put/3`
   """
