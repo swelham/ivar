@@ -17,21 +17,29 @@ defmodule Ivar do
   }
 
   @doc """
-  Creates a new request map for the given HTTP `method` and `url`
+  Creates a new request map for the given HTTP `method` and `url` and merges the
+  specified `opts` into the application level options defined in the `config.exs`
   
   Args
   
     * `method` - the HTTP method as an atom (`:get`, `:post`, `:delete`, etc...)
     * `url` - a binary containing the full url (e.g. `https://example.com`)
+    * `opts` - keyword list containing any valid `HTTPoison` options
     
   Usages
   
-      iex> Ivar.new(:get, "https://example.com")
-      %{method: :get, url: "https://example.com"}
+      Ivar.new(:get, "https://example.com", [timeout: 10_000])
+      %{method: :get, url: "https://example.com", opts: [timeout: 10_000]}
   """
-  @spec new(atom, binary) :: map
-  def new(method, url), do: %{method: method, url: url}
-
+  @spec new(atom, binary, Keyword.t) :: map
+  def new(method, url, opts \\ []) do
+    opts = 
+      Application.get_env(:ivar, :http, [])
+      |> Keyword.merge(opts)
+    
+    %{method: method, url: url, opts: opts}
+  end
+  
   @doc """
   Delegates to `Ivar.Auth.put/3`
   """
@@ -79,15 +87,12 @@ defmodule Ivar do
     |> prepare_auth
     |> prepare_body
 
-    opts = []
-    |> prepare_opts
-
     HTTPoison.request(
       request.method,
       request.url,
       Map.get(request, :body, ""),
       Map.get(request, :headers, []),
-      opts)
+      Map.get(request, :opts, []))
   end
 
   @doc """
@@ -158,13 +163,6 @@ defmodule Ivar do
     |> Map.put(:body, content)
   end
   defp prepare_body(request), do: request
-
-  defp prepare_opts(opts) do
-    case Application.get_env(:ivar, :http) do
-      nil -> opts
-      http -> http || [] ++ opts
-    end
-  end
 
   defp decode_body(body, nil), do: body
   defp decode_body(body, :json), do: Poison.decode!(body)

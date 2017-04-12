@@ -11,11 +11,20 @@ defmodule IvarTest do
   end
 
   test "new/2 should return a map with the correct http method and url set" do
-    assert Ivar.new(:get,    "http://example.com") == %{method: :get, url: "http://example.com"}
-    assert Ivar.new(:post,   "http://example.com") == %{method: :post, url: "http://example.com"}
-    assert Ivar.new(:put,    "http://example.com") == %{method: :put, url: "http://example.com"}
-    assert Ivar.new(:patch,  "http://example.com") == %{method: :patch, url: "http://example.com"}
-    assert Ivar.new(:delete, "http://example.com") == %{method: :delete, url: "http://example.com"}
+    url = "https://example.com"
+    opts = [params: [{"q", "ivar"}]]
+    
+    assert Ivar.new(:get,    url) == %{method: :get,    url: url, opts: opts}
+    assert Ivar.new(:post,   url) == %{method: :post,   url: url, opts: opts}
+    assert Ivar.new(:put,    url) == %{method: :put,    url: url, opts: opts}
+    assert Ivar.new(:patch,  url) == %{method: :patch,  url: url, opts: opts}
+    assert Ivar.new(:delete, url) == %{method: :delete, url: url, opts: opts}
+  end
+  
+  test "new/3 should merge given options on top of application level options" do
+    result = Ivar.new(:get, "", [timeout: 10_000, params: [{"some", "param"}]])
+    
+    assert result.opts == [timeout: 10_000, params: [{"some", "param"}]]
   end
   
   test "put_auth/3 delegate to Ivar.Auth.put/3" do
