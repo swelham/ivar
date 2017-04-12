@@ -182,6 +182,4 @@ defmodule Ivar do
   defp is_body_valid?("", _), do: ""
   defp is_body_valid?({type, _, content}, target_type) when type == target_type,
     do: content
-  defp is_body_valid?({type, _, _}, target_type),
-    do: {:error, "Body type was expected to be '#{target_type}' but is #{type}'"}
 end

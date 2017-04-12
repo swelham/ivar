@@ -185,7 +185,7 @@ defmodule IvarTest do
       
     assert result.status_code == 200
   end
-  @tag me: true
+
   test "send/1 should use http options specified in application config", %{bypass: bypass} do
     Bypass.expect bypass, fn conn ->
       assert conn.query_string == "q=ivar"
@@ -199,7 +199,7 @@ defmodule IvarTest do
 
     assert result.status_code == 200
   end
-  
+
   test "unpack/1 should decode a json response", %{bypass: bypass} do
     Bypass.expect bypass, fn conn ->
       conn
