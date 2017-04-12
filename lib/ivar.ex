@@ -141,7 +141,6 @@ defmodule Ivar do
   defp prepare_body(%{files: files} = request) do
     content = request
     |> Map.get(:body, "")
-    |> is_body_valid?(:url_encoded)
     |> decode_body(:url_encoded)
     |> Enum.reduce([], fn (f, acc) -> [f | acc] end)
     |> Kernel.++(files)
@@ -178,8 +177,4 @@ defmodule Ivar do
 
   defp is_content_type_header?({k, _}),
     do: String.downcase(k) == "content-type"
-
-  defp is_body_valid?("", _), do: ""
-  defp is_body_valid?({type, _, content}, target_type) when type == target_type,
-    do: content
 end
