@@ -42,7 +42,7 @@ defmodule Ivar.Body do
     do: put_body(request, content, "application/x-www-form-urlencoded", :url_encoded)
 
   defp put_body(request, content, type, known_type \\ nil) when is_binary(content) do
-    type = Utilities.get_mime_type(type)
+    type = Utilities.get_mime_type(type, :ext)
 
     header = content_header(type)
 

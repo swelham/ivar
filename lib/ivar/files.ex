@@ -23,7 +23,7 @@ defmodule Ivar.Files do
   Usage
   
       file_data = File.read!("/some/image.png")
-      Ivar.Files.put(%{}, {"file", file_data, "image.png", "png"})
+      Ivar.Files.put(%{}, {"file", file_data, "image.png"})
       # %{files: [{"file", <<1, 2, 3, ...>>, {"form-data", [{"name", "file"}, {"filename", "image.png"}]}, [{"content-type", "image/png"}]}]}
   """
   @spec put(map, {tuple | list}) :: map | {:error, binary}
@@ -41,12 +41,16 @@ defmodule Ivar.Files do
   end
 
   defp put_files(files, []), do: files
+  defp put_files(files, [{name, data, file_name} | rest]) do
+    mime_type = Utilities.get_mime_type(file_name, :file)
+    put_files(files, [{name, data, file_name, mime_type} | rest])
+  end
   defp put_files(files, [{name, data, file_name, type} | rest]) do
     file = {
       name,
       IO.iodata_to_binary(data),
       {"form-data", [{"name", name}, {"filename", file_name}]},
-      [{"content-type", Utilities.get_mime_type(type)}]
+      [{"content-type", Utilities.get_mime_type(type, :ext)}]
     }
 
     put_files([file | files], rest)

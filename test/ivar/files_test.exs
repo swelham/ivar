@@ -58,6 +58,13 @@ defmodule IvarTest.Files do
     assert result == %{files: [expect]}
   end
   
+  test "put/2 should use the file name to resolve the mime type" do
+    expect = file_component("test", "", "test.jpg", "image/jpeg")
+    
+    result = Files.put(%{}, {"test", "", "test.jpg"})
+    
+    assert result == %{files: [expect]}
+  end
   
   defp file_component(name, data, file_name, type) do
     {
