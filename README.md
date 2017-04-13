@@ -60,7 +60,7 @@ send email via the mailgun service.
 ```elixir
 url = "https://api.mailgun.net/v3/domain.com/messages"
 mail_data = %{to: "someone@example.com", ...}
-files = [{"inline", File.read!("elixir.png"), "elixir.png", "png"}, ...]
+files = [{"inline", File.read!("elixir.png"), "elixir.png"}, ...]
 
 Ivar.new(:post, url)
 |> Ivar.put_auth({"api", "mailgun_api_key"}, :basic)

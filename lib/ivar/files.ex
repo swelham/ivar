@@ -17,7 +17,7 @@ defmodule Ivar.Files do
   
   Files
   
-  * tuple - `{"field_name", "some iodata", "file_name.txt", "text"}`
+  * tuple - `{"field_name", "some iodata", "file name", "mime type | file extension"}` - the last element of the tuple is optional and the file name will be used to resolve the mime type
   * list - a list of tuples in the same format as above
   
   Usage
