@@ -19,7 +19,11 @@ defmodule Ivar.Utilities do
   
       iex> Ivar.Utilities.get_mime_type("png")
       "image/png"
+      
+      iex> Ivar.Utilities.get_mime_type("custom/type")
+      "custom/type"
   """
+  @spec get_mime_type(binary) :: binary
   def get_mime_type(type) do
     if Regex.match?(~r/\//, type),
         do: type,
