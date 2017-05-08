@@ -30,7 +30,7 @@ defmodule IvarTest do
   test "put_auth/3 delegate to Ivar.Auth.put/3" do
     result = Ivar.put_auth(%{}, "token", :bearer)
     
-    assert result == %{auth: {"authorization", "bearer token"}}
+    assert result == %{auth: {"authorization", "Bearer token"}}
   end
   
   test "put_headers/3 delegate to Ivar.Headers.put/3" do
@@ -119,7 +119,7 @@ defmodule IvarTest do
 
     for method <- methods do
       Bypass.expect bypass, fn conn ->
-        assert has_header(conn, {"authorization", "bearer some.token"})
+        assert has_header(conn, {"authorization", "Bearer some.token"})
 
         Plug.Conn.send_resp(conn, 200, "")
       end
@@ -138,7 +138,7 @@ defmodule IvarTest do
 
     for method <- methods do
       Bypass.expect bypass, fn conn ->
-        assert has_header(conn, {"authorization", "basic dXNlcm5hbWU6cGFzc3dvcmQ="})
+        assert has_header(conn, {"authorization", "Basic dXNlcm5hbWU6cGFzc3dvcmQ="})
         
         Plug.Conn.send_resp(conn, 200, "")
       end

@@ -20,19 +20,19 @@ defmodule Ivar.Auth do
   Usage
   
       iex> Ivar.Auth.put(%{}, {"user", "pass"}, :basic)
-      %{auth: {"authorization", "basic dXNlcjpwYXNz"}}
+      %{auth: {"authorization", "Basic dXNlcjpwYXNz"}}
   """
   @spec put(map, {tuple | binary}, atom) :: map
   def put(request, credentials, auth_type),
     do: put_auth(request, credentials, auth_type)
 
   defp put_auth(request, token, :bearer) do
-    header = auth_header("bearer #{token}")
+    header = auth_header("Bearer #{token}")
     Map.put(request, :auth, header)
   end
   defp put_auth(request, {user, pass}, :basic) do
     encoded = Base.encode64("#{user}:#{pass}")
-    header = auth_header("basic #{encoded}")
+    header = auth_header("Basic #{encoded}")
     Map.put(request, :auth, header)
   end
 
