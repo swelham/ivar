@@ -230,6 +230,21 @@ defmodule IvarTest do
     assert result.status_code == 200
   end
 
+  test "send/1 should set query string when no default params are set", %{bypass: bypass} do
+    Bypass.expect bypass, fn conn ->
+      assert conn.query_string == "my=query"
+
+      Plug.Conn.send_resp(conn, 200, "")
+    end
+
+    {:ok, result} =
+      Ivar.new(:get, test_url(bypass), params: [])
+      |> Ivar.put_query_string([my: "query"])
+      |> Ivar.send
+
+    assert result.status_code == 200
+  end
+
   test "unpack/1 should decode a json response", %{bypass: bypass} do
     Bypass.expect bypass, fn conn ->
       conn

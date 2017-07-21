@@ -174,14 +174,12 @@ defmodule Ivar do
   defp prepare_body(request), do: request
 
   defp prepare_query_string(%{query: query, opts: opts} = request) do
-    case Keyword.fetch(opts, :params) do
-      {:ok, params} ->
-        params = Enum.into(query, params)
-        updated_opts = Keyword.put(opts, :params, params)
+    params = Keyword.get(opts, :params, [])
+    params = Enum.into(query, params)
 
-        Map.put(request, :opts, updated_opts)
-      _ -> request
-    end
+    updated_opts = Keyword.put(opts, :params, params)
+
+    Map.put(request, :opts, updated_opts)
   end
   defp prepare_query_string(request), do: request
 
