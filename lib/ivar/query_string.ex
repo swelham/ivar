@@ -16,7 +16,7 @@ defmodule Ivar.QueryString do
   * List of Key/value tuple - `[{:key, "value"}, {"q", "ivar"}]`
   * Keyword list - `[key: "value"]`
   * Map - `%{key: "value"} | %{"key" => "value"}`
-  
+
   Usage
   
       iex> Ivar.QueryString.put(%{}, [q: "ivar"])
@@ -29,7 +29,7 @@ defmodule Ivar.QueryString do
     params = Enum.into(params, %{})
     put_params(request, params)
   end
-  
+
   defp put_params(request, params) do
     params = params
     |> Enum.map(&stringify_key/1)
