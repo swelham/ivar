@@ -7,7 +7,8 @@ defmodule Ivar do
     Auth,
     Body,
     Headers,
-    Files
+    Files,
+    QueryString
   }
 
   @mime_types %{
@@ -68,6 +69,13 @@ defmodule Ivar do
   def put_files(request, files),
     do: Files.put(request, files)
 
+    @doc """
+  Delegates to `Ivar.Files.put/2`
+  """
+  @spec put_query_string(map, list | Keyword.t | map) :: map | {:error, binary}
+  def put_query_string(request, params),
+    do: QueryString.put(request, params)
+
   @doc """
   Sends the given HTTP `request`
   
@@ -86,6 +94,7 @@ defmodule Ivar do
     request = request
     |> prepare_auth
     |> prepare_body
+    |> prepare_query_string
 
     HTTPoison.request(
       request.method,
@@ -163,6 +172,21 @@ defmodule Ivar do
     |> Map.put(:body, content)
   end
   defp prepare_body(request), do: request
+
+  defp prepare_query_string(%{query: query, opts: opts} = request) do
+    case Keyword.fetch(opts, :params) do
+      {:ok, params} ->
+        params = query
+        |> Enum.map(fn {k, v} -> {k, v} end)
+        |> Enum.into(params)
+
+        updated_opts = Keyword.put(opts, :params, params)
+
+        Map.put(request, :opts, updated_opts)
+      _ -> request
+    end
+  end
+  defp prepare_query_string(request), do: request
 
   defp decode_body(body, nil), do: body
   defp decode_body(body, :json), do: Poison.decode!(body)

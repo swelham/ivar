@@ -50,6 +50,12 @@ defmodule IvarTest do
     
     assert result == %{files: [{"file", "some text", {"form-data", [{"name", "file"}, {"filename", "test.txt"}]}, [{"content-type", "text/plain"}]}]}
   end
+
+  test "put_query_string/2 delegate to Ivar.QueryString.put/2" do
+    result = Ivar.put_query_string(%{}, [q: "ivar"])
+    
+    assert result == %{query: %{"q" => "ivar"}}
+  end
   
   test "send/1 should send minimal empty request", %{bypass: bypass} do
     methods = [:get, :post, :patch, :put, :delete]
@@ -204,6 +210,21 @@ defmodule IvarTest do
 
     {:ok, result} =
       Ivar.new(:get, test_url(bypass))
+      |> Ivar.send
+
+    assert result.status_code == 200
+  end
+
+  test "send/1 should set query string", %{bypass: bypass} do
+    Bypass.expect bypass, fn conn ->
+      assert conn.query_string == "q=ivar&my=query"
+
+      Plug.Conn.send_resp(conn, 200, "")
+    end
+
+    {:ok, result} =
+      Ivar.new(:get, test_url(bypass))
+      |> Ivar.put_query_string([my: "query"])
       |> Ivar.send
 
     assert result.status_code == 200
