@@ -69,8 +69,8 @@ defmodule Ivar do
   def put_files(request, files),
     do: Files.put(request, files)
 
-    @doc """
-  Delegates to `Ivar.Files.put/2`
+  @doc """
+  Delegates to `Ivar.QueryString.put/2`
   """
   @spec put_query_string(map, list | Keyword.t | map) :: map | {:error, binary}
   def put_query_string(request, params),
