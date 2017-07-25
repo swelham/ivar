@@ -4,6 +4,9 @@ defmodule IvarTest do
 
   import Ivar.TestMacros
 
+  @example_url "https://example.com"
+  @default_opts [params: [{"q", "ivar"}]]
+
   setup do
     bypass = Bypass.open
 
@@ -11,8 +14,8 @@ defmodule IvarTest do
   end
 
   test "new/2 should return a map with the correct http method and url set" do
-    url = "https://example.com"
-    opts = [params: [{"q", "ivar"}]]
+    url = @example_url
+    opts = @default_opts
     
     assert Ivar.new(:get,    url) == %{method: :get,    url: url, opts: opts}
     assert Ivar.new(:post,   url) == %{method: :post,   url: url, opts: opts}
@@ -27,6 +30,26 @@ defmodule IvarTest do
     assert result.opts == [timeout: 10_000, params: [{"some", "param"}]]
   end
   
+  test "get/2 should return a map with the correct http method and url set" do
+    assert Ivar.get(@example_url) == %{method: :get, url: @example_url, opts: @default_opts}
+  end
+  
+  test "post/2 should return a map with the correct http method and url set" do
+    assert Ivar.post(@example_url) == %{method: :post, url: @example_url, opts: @default_opts}
+  end
+  
+  test "put/2 should return a map with the correct http method and url set" do
+    assert Ivar.put(@example_url) == %{method: :put, url: @example_url, opts: @default_opts}
+  end
+  
+  test "patch/2 should return a map with the correct http method and url set" do
+    assert Ivar.patch(@example_url) == %{method: :patch, url: @example_url, opts: @default_opts}
+  end
+
+  test "delete/2 should return a map with the correct http method and url set" do
+    assert Ivar.delete(@example_url) == %{method: :delete, url: @example_url, opts: @default_opts}
+  end
+
   test "put_auth/3 delegate to Ivar.Auth.put/3" do
     result = Ivar.put_auth(%{}, "token", :bearer)
     

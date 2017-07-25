@@ -42,6 +42,86 @@ defmodule Ivar do
   end
 
   @doc """
+  Calls `Ivar.new/3` with the method set to `:get` for the given `url` and `opts`
+  
+  Args
+  
+    * `url` - a binary containing the full url (e.g. `https://example.com`)
+    * `opts` - keyword list containing any valid `HTTPoison` options
+    
+  Usages
+  
+      Ivar.get("https://example.com", [timeout: 10_000])
+      %{method: :get, url: "https://example.com", opts: [timeout: 10_000]}
+  """
+  @spec get(binary, Keyword.t) :: map
+  def get(url, opts \\ []), do: Ivar.new(:get, url, opts)
+
+  @doc """
+  Calls `Ivar.new/3` with the method set to `:post` for the given `url` and `opts`
+  
+  Args
+  
+    * `url` - a binary containing the full url (e.g. `https://example.com`)
+    * `opts` - keyword list containing any valid `HTTPoison` options
+    
+  Usages
+  
+      Ivar.post("https://example.com", [timeout: 10_000])
+      %{method: :post, url: "https://example.com", opts: [timeout: 10_000]}
+  """
+  @spec post(binary, Keyword.t) :: map
+  def post(url, opts \\ []), do: Ivar.new(:post, url, opts)
+
+  @doc """
+  Calls `Ivar.new/3` with the method set to `:put` for the given `url` and `opts`
+  
+  Args
+  
+    * `url` - a binary containing the full url (e.g. `https://example.com`)
+    * `opts` - keyword list containing any valid `HTTPoison` options
+    
+  Usages
+  
+      Ivar.put("https://example.com", [timeout: 10_000])
+      %{method: :put, url: "https://example.com", opts: [timeout: 10_000]}
+  """
+  @spec put(binary, Keyword.t) :: map
+  def put(url, opts \\ []), do: Ivar.new(:put, url, opts)
+
+  @doc """
+  Calls `Ivar.new/3` with the method set to `:patch` for the given `url` and `opts`
+  
+  Args
+  
+    * `url` - a binary containing the full url (e.g. `https://example.com`)
+    * `opts` - keyword list containing any valid `HTTPoison` options
+    
+  Usages
+  
+      Ivar.patch("https://example.com", [timeout: 10_000])
+      %{method: :patch, url: "https://example.com", opts: [timeout: 10_000]}
+  """
+  @spec patch(binary, Keyword.t) :: map
+  def patch(url, opts \\ []), do: Ivar.new(:patch, url, opts)
+
+  @doc """
+  Calls `Ivar.new/3` with the method set to `:delete` for the given `url` and `opts`
+  
+  Args
+  
+    * `url` - a binary containing the full url (e.g. `https://example.com`)
+    * `opts` - keyword list containing any valid `HTTPoison` options
+    
+  Usages
+  
+      Ivar.delete("https://example.com", [timeout: 10_000])
+      %{method: :delete, url: "https://example.com", opts: [timeout: 10_000]}
+  """
+  @spec delete(binary, Keyword.t) :: map
+  def delete(url, opts \\ []), do: Ivar.new(:delete, url, opts)
+
+  @doc """
   Delegates to `Ivar.Auth.put/3`
   """
   @spec put_auth(map, {tuple | binary}, atom) :: map
