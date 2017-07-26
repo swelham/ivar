@@ -1,20 +1,20 @@
 defmodule Ivar.Testing.TestAdapter do
   @moduledoc """
-  TestAdapter is a testing utility that is designed to make testing Ivar simplier by replacing
+  `TestAdapter` is a testing utility that is designed to make testing Ivar simplier by replacing
   http requests with a callback that can be used to assert expected values for the request.
   """
 
   @empty_response {:ok, %{body: "", headers: [], status_code: 200}}
 
   @doc """
-  This function executes a given `Ivar` request and run the function specified by the `:handler` option
-  if this has been specified.
+  This function executes a given `Ivar` request and runs the function specified by the `:handler` option
+  if this has been provided.
   
   Args
   
     * `request` - the map containing the request options to send, usually created via `Ivar.new/2`
   """
-  @spec execute(map) :: map
+  @spec execute(map) :: {:ok, map} | {:error, binary | atom}
   def execute(request) do
     handler = request
     |> Map.get(:opts, [])

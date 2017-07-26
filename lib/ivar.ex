@@ -1,6 +1,6 @@
 defmodule Ivar do
   @moduledoc """
-  Ivar is the top level module used to compose HTTP requests.
+  `Ivar` is the top level module used to compose HTTP requests.
   """
 
   alias Ivar.{
