@@ -3,7 +3,7 @@ defmodule Ivar.Mixfile do
 
   def project do
     [app: :ivar,
-     version: "0.8.1",
+     version: "0.9.0",
      elixir: "~> 1.4",
      description: description(),
      package: package(),
@@ -17,7 +17,7 @@ defmodule Ivar.Mixfile do
   # Type "mix help compile.app" for more information
   def application do
     # Specify extra applications you'll use from Erlang/Elixir
-    [extra_applications: [:logger, :httpoison]]
+    [extra_applications: [:logger]]
   end
 
   # Dependencies can be Hex packages:
@@ -32,20 +32,18 @@ defmodule Ivar.Mixfile do
   defp deps do
     [
       {:mimerl, "~> 1.0.2"},
-      {:httpoison, "~> 0.11.0"},
       
       # optional deps
       {:poison, "~> 2.0 or ~> 3.0", optional: true},
       
-      # dev deps
+      # dev/test deps
       {:ex_doc, "~> 0.15.0", only: :dev},
-      {:credo, "~> 0.7.2", only: [:dev, :test]},
-      {:bypass, "~> 0.6.0", only: :test}
+      {:credo, "~> 0.7.2", only: [:dev, :test]}
     ]
   end
 
   defp description do
-    "Ivar is a light weight wrapper around HTTPoison that provides a fluent and composable way to build http requests."
+    "Ivar is an adapter based HTTP client that provides the ability to build composable HTTP requests"
   end
 
   defp package do

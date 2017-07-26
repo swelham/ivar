@@ -13,7 +13,6 @@ defmodule Ivar do
 
   @mime_types %{
     json: "application/json",
-    xml: "application/xml",
     url_encoded: "application/x-www-form-urlencoded"
   }
 
@@ -25,7 +24,7 @@ defmodule Ivar do
   
     * `method` - the HTTP method as an atom (`:get`, `:post`, `:delete`, etc...)
     * `url` - a binary containing the full url (e.g. `https://example.com`)
-    * `opts` - keyword list containing any valid `HTTPoison` options
+    * `opts` - keyword list containing any valid options for the configured http adapater
     
   Usages
   
@@ -47,7 +46,7 @@ defmodule Ivar do
   Args
   
     * `url` - a binary containing the full url (e.g. `https://example.com`)
-    * `opts` - keyword list containing any valid `HTTPoison` options
+    * `opts` - keyword list containing any valid options for the configured http adapater
     
   Usages
   
@@ -63,7 +62,7 @@ defmodule Ivar do
   Args
   
     * `url` - a binary containing the full url (e.g. `https://example.com`)
-    * `opts` - keyword list containing any valid `HTTPoison` options
+    * `opts` - keyword list containing any valid options for the configured http adapater
     
   Usages
   
@@ -79,7 +78,7 @@ defmodule Ivar do
   Args
   
     * `url` - a binary containing the full url (e.g. `https://example.com`)
-    * `opts` - keyword list containing any valid `HTTPoison` options
+    * `opts` - keyword list containing any valid options for the configured http adapater
     
   Usages
   
@@ -95,7 +94,7 @@ defmodule Ivar do
   Args
   
     * `url` - a binary containing the full url (e.g. `https://example.com`)
-    * `opts` - keyword list containing any valid `HTTPoison` options
+    * `opts` - keyword list containing any valid options for the configured http adapater
     
   Usages
   
@@ -111,7 +110,7 @@ defmodule Ivar do
   Args
   
     * `url` - a binary containing the full url (e.g. `https://example.com`)
-    * `opts` - keyword list containing any valid `HTTPoison` options
+    * `opts` - keyword list containing any valid options for the configured http adapater
     
   Usages
   
@@ -167,21 +166,19 @@ defmodule Ivar do
   
       Ivar.new(:get, "https://example.com")
       |> Ivar.send
-      # {:ok, %HTTPoison.Response{}}
+      # {:ok, %{status_code: 200, body: "", ...}}
   """
-  @spec send(map) :: {:ok, HTTPoison.Response.t} | {:error, HTTPoison.Error.t}
+  @spec send(map) :: {:ok, map} | {:error, binary | atom}
   def send(request) do
     request = request
     |> prepare_auth
     |> prepare_body
     |> prepare_query_string
 
-    HTTPoison.request(
-      request.method,
-      request.url,
-      Map.get(request, :body, ""),
-      Map.get(request, :headers, []),
-      Map.get(request, :opts, []))
+    case Application.get_env(:ivar, :adapter) do
+      nil -> {:error, "No http adapter config found"}
+      adapter -> adapter.execute(request)
+    end
   end
 
   @doc """
@@ -190,18 +187,17 @@ defmodule Ivar do
   
   Args
     
-    * `response` - an HTTPoison success or failure response
+    * `response` - a map containing the request response, usually the result of `Ivar.send/1`
     
   Usage
     
       Ivar.new(:get, "https://example.com")
       |> Ivar.send
       |> Ivar.unpack
-      # {"<!doctype html><html>...", %HTTPoison.Response{}}
+      # {"<!doctype html><html>...", %{status_code: 200, ...}}
   """
-  @spec unpack(atom) ::
-    {binary | map, HTTPoison.Response.t} | {:error, HTTPoison.Error.t}
-  def unpack({:ok, %HTTPoison.Response{body: body} = response}) do
+  @spec unpack(tuple) :: {binary | map, map} | {:error, binary | atom}
+  def unpack({:ok, %{body: body} = response}) do
     ctype = get_content_type(response.headers)
     data = decode_body(body, ctype)
 
@@ -229,21 +225,8 @@ defmodule Ivar do
 
   defp prepare_auth(%{auth: {header, value}} = request),
     do: Headers.put(request, header, value)
-
   defp prepare_auth(request), do: request
 
-  defp prepare_body(%{files: files} = request) do
-    content = request
-    |> Map.get(:body, "")
-    |> get_body_content
-    |> decode_body(:url_encoded)
-    |> Enum.reduce([], fn (f, acc) -> [f | acc] end)
-    |> Kernel.++(files)
-
-    request
-    |> Map.put(:body, {:multipart, content})
-    |> Map.drop([:files])
-  end
   defp prepare_body(%{body: body} = request) do
     {_, header, content} = body
 
@@ -275,7 +258,4 @@ defmodule Ivar do
 
   defp is_content_type_header?({k, _}),
     do: String.downcase(k) == "content-type"
-
-  defp get_body_content(""), do: ""
-  defp get_body_content({_, _, content}), do: content
 end

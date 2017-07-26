@@ -2,25 +2,42 @@
 
 # Ivar
 
-Ivar is a lightweight wrapper around HTTPoison that provides a fluent and composable way to build http requests.
-The key goals of Ivar is to allow requests to be constructed in a composable manner (pipeline friendly) and to 
-simplify building, sending and receiving requests.
+Ivar is an adapter based HTTP client that provides the ability to build composable HTTP requests.
+
+The key goals of Ivar are to allow requests to be constructed in a composable manner (pipeline friendly) and to simplify building, sending and receiving requests for a number of well known
+http clients.
+
+## Supported Adapters
+
+| HTTP Client | Adapter |
+| ----------- | ------- |
+| HTTPoison | ivar_httpoison |
 
 ## Usage
 
-Add `ivar` to your list of dependencies in `mix.exs`:
+Add `ivar` to your list of dependencies in `mix.exs`, plus the http adapter you are going to use:
 
 ```elixir
 def deps do
-  [{:ivar, "~> 0.7.0"}]
+  [
+    {:ivar, "~> 0.9.0"},
+    {:ivar_httpoison, "~> 0.1.0"}
+  ]
 end
+```
+
+Setup up the config for your chosen adapater
+
+```elixir
+config :ivar,
+  :adapter Ivar.HTTPoison
 ```
 
 ### Basic usage
 
 
 ```elixir
-Ivar.new(:get, "https://example.com")
+Ivar.get("https://example.com")
 |> Ivar.send
 |> Ivar.unpack
 # {"<!doctype html>\n<html>...", %HTTPoison.Response{}}
@@ -34,8 +51,9 @@ have it listed along side Ivar in your `mix.exs`.
 ```elixir
 def deps do
   [
-    {:ivar, "~> 0.7.0"},
-    {:poison, "~> 3.0"}
+    {:ivar, "~> 0.9.0"},
+    {:poison, "~> 3.0"},
+    ...
   ]
 end
 ```
@@ -44,7 +62,7 @@ the response contains the `application/json` content type header, the `Ivar.unpa
 function will then decode the response for you.
 
 ```elixir
-Ivar.new(:post, "https://some-echo-server")
+Ivar.post("https://some-echo-server")
 |> Ivar.put_body(%{some: "data"}, :json)
 |> Ivar.send
 |> Ivar.unpack
@@ -67,17 +85,4 @@ Ivar.new(:post, url)
 |> Ivar.put_body(mail_data, :url_encoded)
 |> Ivar.put_files(files)
 |> Ivar.send
-```
-### HTTPoison options
-
-You can specify any of the valid HTTPoison options under the `:http` key of the `:ivar` application inside of your config file. These options will be passed into HTTPoison when you call `Ivar.send`.
-
-Example config:
-
-```elixir
-# config/config.exs
-config :ivar,
-  http: [
-    timeout: 10_000
-  ]
 ```

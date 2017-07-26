@@ -1,16 +1,16 @@
 defmodule Ivar.TestMacros do
-  defmacro has_header(conn, header) do
+  defmacro has_header(req, header) do
     quote do
-      Enum.member?(unquote(conn).req_headers, unquote(header))
+      Enum.member?(unquote(req).headers, unquote(header))
     end
   end
   
-  defmacro has_multipart_header(conn) do
+  defmacro has_multipart_header(req) do
     quote do
-      unquote(conn).req_headers
+      unquote(req).headers
       |> Enum.find(& elem(&1, 0) == "content-type")
       |> elem(1)
-      |> String.starts_with?("multipart/form-data;")
+      |> String.starts_with?("multipart/form-data")
     end
   end
 end

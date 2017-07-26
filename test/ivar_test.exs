@@ -5,13 +5,8 @@ defmodule IvarTest do
   import Ivar.TestMacros
 
   @example_url "https://example.com"
+  @test_url "https://localhost:1234"
   @default_opts [params: [{"q", "ivar"}]]
-
-  setup do
-    bypass = Bypass.open
-
-    {:ok, bypass: bypass}
-  end
 
   test "new/2 should return a map with the correct http method and url set" do
     url = @example_url
@@ -79,42 +74,38 @@ defmodule IvarTest do
     
     assert result == %{query: %{"q" => "ivar"}}
   end
-  
-  test "send/1 should send minimal empty request", %{bypass: bypass} do
+
+  test "send/1 should send minimal empty request" do
     methods = [:get, :post, :patch, :put, :delete]
 
     for method <- methods do
-      Bypass.expect bypass, fn conn ->
-        assert conn.method == method_type(method)
-        assert conn.host == "localhost"
-        assert conn.port == bypass.port
-
-        Plug.Conn.send_resp(conn, 200, "")
+      handler = fn req ->
+        assert req.method == method_type(method)
+        assert req.host == "localhost"
+        assert req.port == 1234
+        {:ok, nil}
       end
 
       {:ok, result} =
-        Ivar.new(method, test_url(bypass))
-        |> Ivar.send
+        Ivar.new(method, @test_url, handler: handler)
+        |> Ivar.send()
       
       assert result.status_code == 200
     end
   end
 
-  test "send/1 should send request with body", %{bypass: bypass} do
+  test "send/1 should send request with body" do
     methods = [:post, :patch, :put]
 
     for method <- methods do
-      Bypass.expect bypass, fn conn ->
-        {:ok, body, _} = Plug.Conn.read_body(conn)
-
-        assert has_header(conn, {"content-type", "application/x-www-form-urlencoded"})
-        assert body == "test=123"
-
-        Plug.Conn.send_resp(conn, 200, "")
+      handler = fn req ->
+        assert has_header(req, {"content-type", "application/x-www-form-urlencoded"})
+        assert req.body == "test=123"
+        {:ok, nil}
       end
 
       {:ok, result} =
-        Ivar.new(method, test_url(bypass))
+        Ivar.new(method, @test_url, handler: handler)
         |> Ivar.Body.put(%{test: 123}, :url_encoded)
         |> Ivar.send
       
@@ -122,19 +113,18 @@ defmodule IvarTest do
     end
   end
 
-  test "send/1 should send request with headers", %{bypass: bypass} do
+  test "send/1 should send request with headers" do
     methods = [:get, :post, :patch, :put, :delete]
 
     for method <- methods do
-      Bypass.expect bypass, fn conn ->
-        assert has_header(conn, {"x-test", "123"})
-        assert has_header(conn, {"x-abc", "xyz"})
-
-        Plug.Conn.send_resp(conn, 200, "")
+      handler = fn req ->
+        assert has_header(req, {"x-test", "123"})
+        assert has_header(req, {"x-abc", "xyz"})
+        {:ok, nil}
       end
 
       {:ok, result} =
-        Ivar.new(method, test_url(bypass))
+        Ivar.new(method, @test_url, handler: handler)
         |> Ivar.Headers.put("x-test", "123")
         |> Ivar.Headers.put("x-abc", "xyz")
         |> Ivar.send
@@ -143,18 +133,17 @@ defmodule IvarTest do
     end
   end
 
-  test "send/1 should send request with bearer auth header", %{bypass: bypass} do
+  test "send/1 should send request with bearer auth header" do
     methods = [:get, :post, :patch, :put, :delete]
 
     for method <- methods do
-      Bypass.expect bypass, fn conn ->
-        assert has_header(conn, {"authorization", "Bearer some.token"})
-
-        Plug.Conn.send_resp(conn, 200, "")
+      handler = fn req ->
+        assert has_header(req, {"authorization", "Bearer some.token"})
+        {:ok, nil}
       end
 
       {:ok, result} =
-        Ivar.new(method, test_url(bypass))
+        Ivar.new(method, @test_url, handler: handler)
         |> Ivar.Auth.put("some.token", :bearer)
         |> Ivar.send
       
@@ -162,18 +151,17 @@ defmodule IvarTest do
     end
   end
 
-  test "send/1 should send request with basic auth header", %{bypass: bypass} do
+  test "send/1 should send request with basic auth header" do
     methods = [:get, :post, :patch, :put, :delete]
 
     for method <- methods do
-      Bypass.expect bypass, fn conn ->
-        assert has_header(conn, {"authorization", "Basic dXNlcm5hbWU6cGFzc3dvcmQ="})
-        
-        Plug.Conn.send_resp(conn, 200, "")
+      handler = fn req ->
+        assert has_header(req, {"authorization", "Basic dXNlcm5hbWU6cGFzc3dvcmQ="})
+        {:ok, nil}
       end
 
       {:ok, result} =
-        Ivar.new(method, test_url(bypass))
+        Ivar.new(method, @test_url, handler: handler)
         |> Ivar.Auth.put({"username", "password"}, :basic)
         |> Ivar.send
       
@@ -181,42 +169,33 @@ defmodule IvarTest do
     end
   end
 
-  test "send/1 should send request with files attached", %{bypass: bypass} do
-    Bypass.expect bypass, fn conn ->
-      {:ok, body, _} = Plug.Conn.read_body(conn)
-      
-      assert body != nil
-      assert has_header(conn, {"content-length", "10322"})
-      assert has_multipart_header(conn)
-      
-      Plug.Conn.send_resp(conn, 200, "")
+  test "send/1 should send request with files" do
+    handler = fn req ->
+      assert req.files_count == 1
+      {:ok, nil}
     end
     
     file_data = File.read!("test/fixtures/elixir.png")
     
     {:ok, result} =
-      Ivar.new(:post, test_url(bypass))
+      Ivar.new(:post, @test_url, handler: handler)
       |> Ivar.Files.put({"file", file_data, "elixir.png", "png"})
       |> Ivar.send
       
     assert result.status_code == 200
   end
 
-  test "send/1 should send request with files and body", %{bypass: bypass} do
-    Bypass.expect bypass, fn conn ->
-      {:ok, body, _} = Plug.Conn.read_body(conn)
-
-      assert body != nil
-      assert has_header(conn, {"content-length", "10481"})
-      assert has_multipart_header(conn)
-      
-      Plug.Conn.send_resp(conn, 200, "")
+  test "send/1 should send request with files and body" do
+    handler = fn req ->
+      assert req.body != nil
+      assert req.files_count == 1
+      {:ok, nil}
     end
     
     file_data = File.read!("test/fixtures/elixir.png")
     
     {:ok, result} =
-      Ivar.new(:post, test_url(bypass))
+      Ivar.new(:post, @test_url, handler: handler)
       |> Ivar.Body.put(%{test: "data"}, :url_encoded)
       |> Ivar.Files.put({"file", file_data, "elixir.png", "png"})
       |> Ivar.send
@@ -224,117 +203,106 @@ defmodule IvarTest do
     assert result.status_code == 200
   end
 
-  test "send/1 should use http options specified in application config", %{bypass: bypass} do
-    Bypass.expect bypass, fn conn ->
-      assert conn.query_string == "q=ivar"
-
-      Plug.Conn.send_resp(conn, 200, "")
+  test "send/1 should use http options specified in application config" do
+    handler = fn req ->
+      assert req.query == "q=ivar"
+      {:ok, nil}
     end
 
     {:ok, result} =
-      Ivar.new(:get, test_url(bypass))
+      Ivar.new(:get, @test_url, handler: handler)
       |> Ivar.send
 
     assert result.status_code == 200
   end
 
-  test "send/1 should set query string", %{bypass: bypass} do
-    Bypass.expect bypass, fn conn ->
-      assert conn.query_string == "q=ivar&my=query"
-
-      Plug.Conn.send_resp(conn, 200, "")
+  test "send/1 should set query string" do
+    handler = fn req ->
+      assert req.query == "q=ivar&my=query"
+      {:ok, nil}
     end
 
     {:ok, result} =
-      Ivar.new(:get, test_url(bypass))
+      Ivar.new(:get, @test_url, handler: handler)
       |> Ivar.put_query_string([my: "query"])
       |> Ivar.send
 
     assert result.status_code == 200
   end
 
-  test "send/1 should set query string when no default params are set", %{bypass: bypass} do
-    Bypass.expect bypass, fn conn ->
-      assert conn.query_string == "my=query"
-
-      Plug.Conn.send_resp(conn, 200, "")
+  test "send/1 should set query string when no default params are set" do
+    handler = fn req ->
+      assert req.query == "my=query"
+      {:ok, nil}
     end
 
     {:ok, result} =
-      Ivar.new(:get, test_url(bypass), params: [])
+      Ivar.new(:get, @test_url, params: [], handler: handler)
       |> Ivar.put_query_string([my: "query"])
       |> Ivar.send
 
     assert result.status_code == 200
   end
 
-  test "unpack/1 should decode a json response", %{bypass: bypass} do
-    Bypass.expect bypass, fn conn ->
-      conn
-        |> Plug.Conn.put_resp_content_type("application/json")
-        |> Plug.Conn.send_resp(200, "{\"test\":\"data\"}")
+  test "unpack/1 should decode a json response" do
+    handler = fn _ ->
+      {:ok, {200, :json, "{\"test\":\"data\"}"}}
     end
     
-    {result, %HTTPoison.Response{}} =
-      Ivar.new(:get, test_url(bypass))
+    {data, _} =
+      Ivar.new(:get, @test_url, handler: handler)
       |> Ivar.send
       |> Ivar.unpack
       
-    assert result == %{"test" => "data"}
-  end
-  
-  test "unpack/1 should decode a url encoded response", %{bypass: bypass} do
-    Bypass.expect bypass, fn conn ->
-      conn
-        |> Plug.Conn.put_resp_content_type("application/x-www-form-urlencoded")
-        |> Plug.Conn.send_resp(200, "test=data")
-    end
-    
-    {result, %HTTPoison.Response{}} =
-      Ivar.new(:get, test_url(bypass))
-      |> Ivar.send
-      |> Ivar.unpack
-      
-    assert result == %{"test" => "data"}
+    assert data == %{"test" => "data"}
   end
 
-  test "unpack/1 should return raw response when unknown content type", %{bypass: bypass} do
-    Bypass.expect bypass, fn conn ->
-      conn
-        |> Plug.Conn.put_resp_content_type("unknown/type")
-        |> Plug.Conn.send_resp(200, "test=data")
+  test "unpack/1 should decode a url encoded response" do
+    handler = fn _ ->
+      {:ok, {200, :url_encoded, "test=data"}}
     end
     
-    {result, %HTTPoison.Response{}} =
-      Ivar.new(:get, test_url(bypass))
+    {data, _} =
+      Ivar.new(:get, @test_url, handler: handler)
+      |> Ivar.send
+      |> Ivar.unpack
+
+    assert data == %{"test" => "data"}
+  end
+
+  test "unpack/1 should return raw response when unknown content type" do
+    handler = fn _ ->
+      {:ok, {200, "unknown/type", "test=data"}}
+    end
+    
+    {data, _} =
+      Ivar.new(:get, @test_url, handler: handler)
       |> Ivar.send
       |> Ivar.unpack
       
-    assert result == "test=data"
+    assert data == "test=data"
   end
 
-  test "unpack/1 should return raw response when no content type is found", %{bypass: bypass} do
-    Bypass.expect bypass, fn conn ->
-      Plug.Conn.send_resp(conn, 200, "test=data")
+  test "unpack/1 should return raw response when no content type is found" do
+    handler = fn _ ->
+      {:ok, {200, "test=data"}}
     end
     
-    {result, %HTTPoison.Response{}} =
-      Ivar.new(:get, test_url(bypass))
+    {data, _} =
+      Ivar.new(:get, @test_url, handler: handler)
       |> Ivar.send
       |> Ivar.unpack
       
-    assert result == "test=data"
+    assert data == "test=data"
   end
 
-  test "unpack/1 should return error when receiving an HTTPoison.Error" do
-    test_error = {:error, %HTTPoison.Error{id: 1, reason: "test_error"}}
+  test "unpack/1 should return error when receiving an error response" do
+    test_error = {:error, %{reason: "test_error"}}
     
     result = Ivar.unpack(test_error)
     
     assert result == test_error
   end
-
-  defp test_url(bypass), do: "http://localhost:#{bypass.port}/"
 
   defp method_type(:get),     do: "GET"
   defp method_type(:post),    do: "POST"
