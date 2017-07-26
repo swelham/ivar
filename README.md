@@ -11,7 +11,7 @@ http clients.
 
 | HTTP Client | Adapter |
 | ----------- | ------- |
-| HTTPoison | ivar_httpoison |
+| HTTPoison | [ivar_httpoison](https://github.com/swelham/ivar_httpoison) |
 
 ## Usage
 
