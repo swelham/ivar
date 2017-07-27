@@ -30,7 +30,7 @@ Setup up the config for your chosen adapater
 
 ```elixir
 config :ivar,
-  :adapter Ivar.HTTPoison
+  adapter: Ivar.HTTPoison
 ```
 
 ### Basic usage
