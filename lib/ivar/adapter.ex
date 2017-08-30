@@ -4,7 +4,7 @@ defmodule Ivar.Adapter do
   """
   
   @doc """
-  Callback used to executes the given `request`.
+  Callback used to execute the given `request`.
   """
-  @callback init(request :: map) :: tuple
+  @callback execute(request :: map) :: tuple
 end
