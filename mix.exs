@@ -3,7 +3,7 @@ defmodule Ivar.Mixfile do
 
   def project do
     [app: :ivar,
-     version: "0.10.0",
+     version: "0.10.1",
      elixir: "~> 1.4",
      description: description(),
      package: package(),
