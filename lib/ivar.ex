@@ -24,7 +24,7 @@ defmodule Ivar do
   
     * `method` - the HTTP method as an atom (`:get`, `:post`, `:delete`, etc...)
     * `url` - a binary containing the full url (e.g. `https://example.com`)
-    * `opts` - keyword list containing any valid options for the configured http adapater
+    * `opts` - keyword list containing any valid options for the configured http adapter
     
   Usages
   
@@ -46,7 +46,7 @@ defmodule Ivar do
   Args
   
     * `url` - a binary containing the full url (e.g. `https://example.com`)
-    * `opts` - keyword list containing any valid options for the configured http adapater
+    * `opts` - keyword list containing any valid options for the configured http adapter
     
   Usages
   
@@ -62,7 +62,7 @@ defmodule Ivar do
   Args
   
     * `url` - a binary containing the full url (e.g. `https://example.com`)
-    * `opts` - keyword list containing any valid options for the configured http adapater
+    * `opts` - keyword list containing any valid options for the configured http adapter
     
   Usages
   
@@ -78,7 +78,7 @@ defmodule Ivar do
   Args
   
     * `url` - a binary containing the full url (e.g. `https://example.com`)
-    * `opts` - keyword list containing any valid options for the configured http adapater
+    * `opts` - keyword list containing any valid options for the configured http adapter
     
   Usages
   
@@ -94,7 +94,7 @@ defmodule Ivar do
   Args
   
     * `url` - a binary containing the full url (e.g. `https://example.com`)
-    * `opts` - keyword list containing any valid options for the configured http adapater
+    * `opts` - keyword list containing any valid options for the configured http adapter
     
   Usages
   
@@ -110,7 +110,7 @@ defmodule Ivar do
   Args
   
     * `url` - a binary containing the full url (e.g. `https://example.com`)
-    * `opts` - keyword list containing any valid options for the configured http adapater
+    * `opts` - keyword list containing any valid options for the configured http adapter
     
   Usages
   
@@ -119,6 +119,22 @@ defmodule Ivar do
   """
   @spec delete(binary, Keyword.t) :: map
   def delete(url, opts \\ []), do: Ivar.new(:delete, url, opts)
+
+  @doc """
+  Calls `Ivar.new/3` with the method set to `:options` for the given `url` and `opts`
+  
+  Args
+  
+    * `url` - a binary containing the full url (e.g. `https://example.com`)
+    * `opts` - keyword list containing any valid options for the configured http adapter
+    
+  Usages
+  
+      Ivar.options("https://example.com", [timeout: 10_000])
+      %{method: :options, url: "https://example.com", opts: [timeout: 10_000]}
+  """
+  @spec options(binary, Keyword.t) :: map
+  def options(url, opts \\ []), do: Ivar.new(:options, url, opts)
 
   @doc """
   Delegates to `Ivar.Auth.put/3`

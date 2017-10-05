@@ -90,4 +90,5 @@ defmodule Ivar.Testing.TestAdapter do
   defp method_string(:put),     do: "PUT"
   defp method_string(:patch),   do: "PATCH"
   defp method_string(:delete),  do: "DELETE"
+  defp method_string(:options), do: "OPTIONS"
 end

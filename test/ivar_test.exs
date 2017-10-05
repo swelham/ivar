@@ -12,11 +12,12 @@ defmodule IvarTest do
     url = @example_url
     opts = @default_opts
     
-    assert Ivar.new(:get,    url) == %{method: :get,    url: url, opts: opts}
-    assert Ivar.new(:post,   url) == %{method: :post,   url: url, opts: opts}
-    assert Ivar.new(:put,    url) == %{method: :put,    url: url, opts: opts}
-    assert Ivar.new(:patch,  url) == %{method: :patch,  url: url, opts: opts}
-    assert Ivar.new(:delete, url) == %{method: :delete, url: url, opts: opts}
+    assert Ivar.new(:get,     url) == %{method: :get,     url: url, opts: opts}
+    assert Ivar.new(:post,    url) == %{method: :post,    url: url, opts: opts}
+    assert Ivar.new(:put,     url) == %{method: :put,     url: url, opts: opts}
+    assert Ivar.new(:patch,   url) == %{method: :patch,   url: url, opts: opts}
+    assert Ivar.new(:delete,  url) == %{method: :delete,  url: url, opts: opts}
+    assert Ivar.new(:options, url) == %{method: :options, url: url, opts: opts}
   end
   
   test "new/3 should merge given options on top of application level options" do
@@ -43,6 +44,10 @@ defmodule IvarTest do
 
   test "delete/2 should return a map with the correct http method and url set" do
     assert Ivar.delete(@example_url) == %{method: :delete, url: @example_url, opts: @default_opts}
+  end
+
+  test "options/2 should return a map with the correct http method and url set" do
+    assert Ivar.options(@example_url) == %{method: :options, url: @example_url, opts: @default_opts}
   end
 
   test "put_auth/3 delegate to Ivar.Auth.put/3" do
@@ -76,7 +81,7 @@ defmodule IvarTest do
   end
 
   test "send/1 should send minimal empty request" do
-    methods = [:get, :post, :patch, :put, :delete]
+    methods = [:get, :post, :patch, :put, :delete, :options]
 
     for method <- methods do
       handler = fn req ->
@@ -114,7 +119,7 @@ defmodule IvarTest do
   end
 
   test "send/1 should send request with headers" do
-    methods = [:get, :post, :patch, :put, :delete]
+    methods = [:get, :post, :patch, :put, :delete, :options]
 
     for method <- methods do
       handler = fn req ->
@@ -134,7 +139,7 @@ defmodule IvarTest do
   end
 
   test "send/1 should send request with bearer auth header" do
-    methods = [:get, :post, :patch, :put, :delete]
+    methods = [:get, :post, :patch, :put, :delete, :options]
 
     for method <- methods do
       handler = fn req ->
@@ -152,7 +157,7 @@ defmodule IvarTest do
   end
 
   test "send/1 should send request with basic auth header" do
-    methods = [:get, :post, :patch, :put, :delete]
+    methods = [:get, :post, :patch, :put, :delete, :options]
 
     for method <- methods do
       handler = fn req ->
@@ -309,4 +314,5 @@ defmodule IvarTest do
   defp method_type(:put),     do: "PUT"
   defp method_type(:patch),   do: "PATCH"
   defp method_type(:delete),  do: "DELETE"
+  defp method_type(:options), do: "OPTIONS"
 end
